@@ -67,15 +67,19 @@ public class World {
     }
 
     public void initBuffers(GL3 gl) {
-        int vertexCount = paper.getParticles().size() * 6;
-        elementCount = paper.getSpringForces().size() * 2;
+        int vertexCount = paper.getParticles().size() * 6 * 2;
+        elementCount = paper.getSpringForces().size() * 2 + paper.getParticles().size() * 2;
         vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount);
         elementBuffer = GLBuffers.newDirectShortBuffer(elementCount);
 
         int i = 0;
         for (Spring f: paper.getSpringForces()) {
-            elementBuffer.put(i++, (short) f.p1.id);
-            elementBuffer.put(i++, (short) f.p2.id);
+            elementBuffer.put(i++, (short) (f.p1.id*2));
+            elementBuffer.put(i++, (short) (f.p2.id*2));
+        }
+        for (Particle p: paper.getParticles()) {
+            elementBuffer.put(i++, (short) (p.id*2));
+            elementBuffer.put(i++, (short) (p.id*2+1));
         }
 
         gl.glGenBuffers(Buffer.MAX, bufferName);
@@ -126,10 +130,16 @@ public class World {
         synchronized(stepper) {
             for (Particle p : paper.getParticles())
             {
-                vertexBuffer.put(p.id * 6, p.pos.x);
-                vertexBuffer.put(p.id * 6 + 1, p.pos.y);
-                vertexBuffer.put(p.id * 6 + 2, p.pos.z);
-                vertexBuffer.put(p.id * 6 + 3, Math.abs(p.pos.z / 10));
+                vertexBuffer.put(p.id * 6 * 2, p.pos.x);
+                vertexBuffer.put(p.id * 6 * 2 + 1, p.pos.y);
+                vertexBuffer.put(p.id * 6 * 2 + 2, p.pos.z);
+                vertexBuffer.put(p.id * 6 * 2 + 3, Math.abs(p.pos.z / 10));
+
+
+                vertexBuffer.put(p.id * 6 * 2 + 6, p.pos.x + p.norm.x);
+                vertexBuffer.put(p.id * 6 * 2 + 6 + 1, p.pos.y + p.norm.y);
+                vertexBuffer.put(p.id * 6 * 2 + 6 + 2, p.pos.z + p.norm.z);
+                vertexBuffer.put(p.id * 6 * 2 + 6 + 5, 1);
             }
         }
         gl.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));

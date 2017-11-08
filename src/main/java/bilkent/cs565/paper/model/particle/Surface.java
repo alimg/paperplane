@@ -1,12 +1,13 @@
 package bilkent.cs565.paper.model.particle;
 
+import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
 import static glm.GlmKt.glm;
 
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -0.10f;
+    private static final float LIFT_FACTOR = -0.15f;
 
     private final Particle[] particles;
 
@@ -26,7 +27,7 @@ public class Surface implements Force {
             center = center.plus(p.pos);
         }
         normal = normal.normalize();
-        center = center.div(particles.length);
+        center = center.times(1.0/particles.length);
 
         // compute surface area
         Vec3 c1 = particles[1].pos.minus(particles[0].pos);
@@ -51,19 +52,23 @@ public class Surface implements Force {
         vel = vel.normalize();
 
         Vec3 liftForce = new Vec3();
-        if (v2>0)
-            liftForce = n1.plus(n2).times(0.5f*glm.dot(normal, vel) * v2 * area * LIFT_FACTOR * dt);
-
+        if (v2 > 0) {
+            liftForce = normal.times(0.5f * GLM.dot(normal, vel) * v2 * area * LIFT_FACTOR * dt);
+        }
         // apply lift
         for (Particle p: particles) {
             //liftForce = p.norm.times(glm.dot(normal, vel) * area * LIFT_FACTOR * dt);
+            Vec3 rvel = p.vel.minus(vel);
             Vec3 dp = p.pos.minus(center);
-            dp.minus(dp.times((0.7071067811865476f / dp.length())));
-            dp = dp.times(dp.length());
-            p.vel = p.vel.plus(liftForce)
-                //.plus(p.pos.minus(center).times(dt * 2.9))
-                .plus(dp.times(dt * 3.9))
-            ;
+            dp.minus(dp.normalize().times(0.7071067811865476f));
+            if (dp.length()>0.00001) {
+                p.vel = p.vel
+                    .plus(dp.times(dt * -0.8))
+                    .plus(dp.times(GLM.dot(dp.normalize(), rvel) * dt * .2f / dp.length()));
+            }
+            //dp = dp.times(dp.length());
+            p.vel = p.vel
+                .plus(liftForce);
         }
     }
 

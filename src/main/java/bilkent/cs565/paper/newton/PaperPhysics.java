@@ -23,13 +23,13 @@ public class PaperPhysics {
         // apply collision forces
         for (Particle p: paper.getParticles()) {
 
-            if (p.pos.x < 3 && p.pos.z < -10)
+            if (p.pos.x < 5 && p.pos.z < -10)
             {
                 //p.pos.z = -10f;
-                if (p.pos.z > -10.1)
-                    p.vel.z += (-10 - p.pos.z);
+                if (p.pos.z > -10.3)
+                    p.vel.z += (-10 - p.pos.z)*2;
 
-                p.vel = p.vel.times(0.999);
+                p.vel = p.vel.times(0.99);
                 //p.vel = p.vel.times(0.99f, 0.99f, 0.2f);
             }
         }

@@ -1,10 +1,11 @@
 package bilkent.cs565.paper.model.particle;
 
+import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
 
 public class Spring implements Force {
-    private static final float K = 30f;
-    private static final float B = 0.3f;
+    private static final float K = 40.1f;
+    private static final float B = 2.21f;
 
     public Particle p1;
     public Particle p2;
@@ -23,24 +24,16 @@ public class Spring implements Force {
     @Override
     public void step(double dt) {
         Vec3 displacement = p2.pos.minus(p1.pos);
-        Vec3 newDir = displacement.normalize().times(size);
-        //displacement.normalize().cross(dir.normalize());
-        //displacement = displacement.minus(dir);
-        Vec3 dnorm = newDir.normalize().cross(p1.norm.normalize()).normalize();
-        newDir = p1.norm.cross(dnorm).normalize().times(size);
-        Vec3 dnorm2 = newDir.normalize().cross(p2.norm.normalize()).normalize();
-        Vec3 newDir2 = p2.norm.cross(dnorm2).normalize().times(size);
-        newDir = newDir.plus(newDir2).div(2);
-        //newDir = newDir.plus(dir.times(0.1)).div(1.5);
-        //displacement = displacement.minus(newDir) .plus( displacement.minus(dir));
-        displacement = displacement.minus(newDir);
-        Vec3 tension = displacement.times(K);
-        Vec3 damp = p2.vel.minus(p1.vel).times(B);
 
+        Vec3 pull = displacement.minus(displacement.normalize().times(size));
+        final Vec3 vrel = p2.vel.minus(p1.vel);
+        Vec3 tension = pull.times(K);
+        Vec3 damp = displacement.normalize().times(GLM.dot(displacement.normalize(), vrel) * B);
         Vec3 f = tension.plus(damp).times(dt);
         p1.vel = p1.vel.plus(f);
         p2.vel = p2.vel.minus(f);
-        dir = dir.plus(newDir.times(10)).div(11);
-        //dir = newDir;
+
+        p1.vel = p1.vel.plus(p1.norm.times(p1.norm.cross(p2.norm).length() * -1.1 * dt));
+        p2.vel = p2.vel.plus(p2.norm.times(p2.norm.cross(p1.norm).length() * -1.1 * dt));
     }
 }
