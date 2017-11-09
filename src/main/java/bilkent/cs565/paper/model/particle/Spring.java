@@ -5,6 +5,8 @@ import glm.vec._3.Vec3;
 
 public class Spring implements Force {
     private static final float K = 40.1f;
+    private static final float K_V = 9.8f;
+    private static final float K_H = 40.1f;
     private static final float B = 2.21f;
 
     public Particle p1;
@@ -33,7 +35,8 @@ public class Spring implements Force {
         p1.vel = p1.vel.plus(f);
         p2.vel = p2.vel.minus(f);
 
-        p1.vel = p1.vel.plus(p1.norm.times(p1.norm.cross(p2.norm).length() * -1.1 * dt));
-        p2.vel = p2.vel.plus(p2.norm.times(p2.norm.cross(p1.norm).length() * -1.1 * dt));
+        //p1.vel = p1.vel.plus(p1.norm.times(p1.norm.cross(p2.norm).length() * -1.1 * dt));
+        p2.vel = p2.vel.plus(p2.norm.times(Math.pow(GLM.dot(p1.norm, displacement), 3) * -K_V * dt));
+        p1.vel = p1.vel.plus(p1.norm.times(Math.pow(GLM.dot(p2.norm, displacement), 3) * K_V * dt));
     }
 }

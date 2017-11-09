@@ -44,7 +44,8 @@ public class World {
 
 
     public World() {
-        //paper = Paper.createFlat(15,15, 15, 15);
+        //paper = Paper.createFlat(15,15, 5, 5);
+        //paper = Paper.createFlat(10, 10, 10, 10);
         paper = Paper.createFlat(10, 10, 10, 10);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
