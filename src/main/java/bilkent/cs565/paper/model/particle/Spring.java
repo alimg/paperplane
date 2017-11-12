@@ -4,10 +4,10 @@ import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
 
 public class Spring implements Force {
-    private static final float K = 40.1f;
-    private static final float K_V = 9.8f;
+    private static final float K = 30.1f;
+    private static final float K_V = 6.8f;
     private static final float K_H = 40.1f;
-    private static final float B = 2.21f;
+    private static final float B = 2.61f;
 
     public Particle p1;
     public Particle p2;

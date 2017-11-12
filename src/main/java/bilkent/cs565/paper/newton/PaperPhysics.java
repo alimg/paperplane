@@ -23,7 +23,7 @@ public class PaperPhysics {
         // apply collision forces
         for (Particle p: paper.getParticles()) {
 
-            if (p.pos.x < 6.5 && p.pos.z < -10)
+            if (p.pos.x < 3.5 && p.pos.z < -10)
             {
                 //p.pos.z = -10f;
                 if (p.pos.z > -10.3)

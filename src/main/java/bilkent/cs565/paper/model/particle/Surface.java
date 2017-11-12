@@ -6,7 +6,7 @@ import glm.vec._3.Vec3;
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -0.65f;
+    private static final float LIFT_FACTOR = -0.35f;
     private final float mag;
 
     private final Particle[] particles;
@@ -78,8 +78,8 @@ public class Surface implements Force {
             dp.minus(dp.normalize().times(mag));
             if (dp.length()>0.00001) {
                 p.vel = p.vel
-                    .plus(dp.times(dt * -6.8))
-                    .plus(dp.times(GLM.dot(dp.normalize(), rvel) * dt * -0.4f / dp.length()));
+                    .plus(dp.times(dt * -3.0))
+                    .plus(dp.times(GLM.dot(dp.normalize(), rvel) * dt * -0.2f / dp.length()));
             }
             //dp = dp.times(dp.length());
             p.vel = p.vel
