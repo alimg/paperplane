@@ -8,6 +8,11 @@ public class Stepper {
     }
 
     public void step(double dt) {
-        paper.step(dt);
+        paper.step(0, 0);
+        paper.step(dt*0.5, 1);
+        paper.step(dt*0.5, 2);
+        paper.step(dt, 3);
+        paper.integrate(dt);
+
     }
 }

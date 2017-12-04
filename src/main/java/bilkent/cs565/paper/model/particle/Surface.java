@@ -6,14 +6,13 @@ import glm.vec._3.Vec3;
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -0.35f;
+    private static final float LIFT_FACTOR = -5.35f;
     private final float mag;
 
     private final Particle[] particles;
 
     public Surface(Particle[] p) {
         particles = p;
-
 
         Vec3 c1 = particles[1].pos.minus(particles[0].pos);
         Vec3 c2 = particles[3].pos.minus(particles[0].pos);
@@ -33,16 +32,18 @@ public class Surface implements Force {
     }
 
     @Override
-    public void step(double dt) {
+    public void step(double dt, int order) {
         Vec3 normal = new Vec3();
         Vec3 vel = new Vec3();
         Vec3 center = new Vec3();
 
         for (Particle p: particles) {
-            vel = vel.plus(p.vel);
+            vel = vel.plus(p.dxdt[order]);
             normal = normal.plus(p.norm);
             center = center.plus(p.pos);
         }
+
+        vel = vel.div(particles.length);
         normal = normal.normalize();
         center = center.times(1.0/particles.length);
 
@@ -62,28 +63,11 @@ public class Surface implements Force {
         particles[2].norm = particles[2].norm.plus(n2.normalize()).normalize();
         particles[3].norm = particles[3].norm.plus(n2.normalize()).normalize();
 
-        vel = vel.div(particles.length);
-        float v2 = vel.length() * vel.length();
-        vel = vel.normalize();
-
-        Vec3 liftForce = new Vec3();
-        if (v2 > 0) {
-            liftForce = normal.times(0.5f * GLM.dot(normal, vel) * v2 * area * LIFT_FACTOR * dt);
-        }
+        Vec3 vel2 = vel.times(vel.length()*1000);
+        Vec3 liftForce = normal.times(0.5f * GLM.dot(normal, vel2) * area * LIFT_FACTOR * dt);
         // apply lift
         for (Particle p: particles) {
-            //liftForce = p.norm.times(glm.dot(normal, vel) * area * LIFT_FACTOR * dt);
-            Vec3 rvel = p.vel.minus(vel);
-            Vec3 dp = p.pos.minus(center);
-            dp.minus(dp.normalize().times(mag));
-            if (dp.length()>0.00001) {
-                p.vel = p.vel
-                    .plus(dp.times(dt * -3.0))
-                    .plus(dp.times(GLM.dot(dp.normalize(), rvel) * dt * -0.2f / dp.length()));
-            }
-            //dp = dp.times(dp.length());
-            p.vel = p.vel
-                .plus(liftForce);
+            p.dxdt[order] = p.dxdt[order].plus(liftForce);
         }
     }
 
