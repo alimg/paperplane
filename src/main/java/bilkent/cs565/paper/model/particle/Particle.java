@@ -5,10 +5,12 @@ import glm.mat.Mat4x4;
 
 public class Particle {
     public final int id;
-
+    public float mass = -0.05f;
     public Mat4x4 orientation = new Mat4x4();
     public Vec3 pos = new Vec3();
     public Vec3 norm = new Vec3();
+    public Vec3 normSum = new Vec3();
+    public int normCount = 0;
     public Vec3 dir = new Vec3();
     public Vec3 vel = new Vec3();
 

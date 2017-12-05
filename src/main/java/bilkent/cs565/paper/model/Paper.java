@@ -8,21 +8,24 @@ import glm.vec._3.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Paper {
 
     private final List<Force> forces;
     private final List<Particle> particles;
-    private final List<Spring> springForces;
+    private final List<Spring> springForces = new ArrayList<>();
+    private final List<Surface> surfaces = new ArrayList<>();
 
     public Paper(ArrayList<Particle> particles, ArrayList<Force> forces) {
         this.particles = particles;
         this.forces = forces;
-        springForces = forces.stream()
-                .filter(force -> force instanceof Spring)
-                .map(force -> (Spring) force)
-                .collect(Collectors.toList());
+        forces.forEach((f)-> {
+            if (f instanceof Spring) {
+                springForces.add((Spring) f);
+            } else if (f instanceof Surface){
+                surfaces.add((Surface) f);
+            }
+        });
     }
 
     public static Paper createFlat(int n, int m, float X, float Y) {
@@ -30,9 +33,10 @@ public class Paper {
         for (int x = 0; x < n; x++) {
             for (int y = 0; y < m; y++) {
                 Particle p = new Particle(particles.size());
-                p.pos = new Vec3(x*X/n, y*Y/m, Math.random()*0.005 + x*0.03*X/n+ 4);
+                p.pos = new Vec3(x*X/n, y*Y/m, Math.random()*0.21 + x*0.01*X/n+ 4);
                 p.norm = new Vec3(0, 0, 1);
                 p.dir = new Vec3(0, -1, 0);
+                p.vel = new Vec3(0.2f,0.1f,0);
                 particles.add(p);
             }
         }
@@ -97,5 +101,9 @@ public class Paper {
 
     public List<Spring> getSpringForces() {
         return springForces;
+    }
+
+    public List<Surface> getSurfaces() {
+        return surfaces;
     }
 }

@@ -162,11 +162,11 @@ public class Main implements GLEventListener, KeyListener {
         {
             diff = Math.max(0,diff-10);
             Mat4x4 view = new Mat4x4();
-            view = view.scale((float)(0.15f + 0.05f*(1/(1+diff) -1)));
+            view = view.scale((float)(0.15f + 0.025f*(1/(1+diff) -1)));
             view = view.scale(1,1,0.1f);
             view = view.rotate((float) (Math.PI/4.0f), -1,0,0);
             //view = view.translate(0,0,-1f);
-            view = view.translate(-2.5f,4 + diff*0.f,0);
+            view = view.translate(-2.5f, 15+ diff*0.1f,-10);
             view.to(matBuffer);
 
             gl.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.GLOBAL_MATRICES));

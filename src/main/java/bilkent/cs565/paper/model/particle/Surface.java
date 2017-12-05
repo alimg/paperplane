@@ -6,10 +6,10 @@ import glm.vec._3.Vec3;
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -5.35f;
+    private static final float LIFT_FACTOR = -16.0f;
     private final float mag;
 
-    private final Particle[] particles;
+    public final Particle[] particles;
 
     public Surface(Particle[] p) {
         particles = p;
@@ -27,6 +27,7 @@ public class Surface implements Force {
         Vec3 center = new Vec3();
         for (Particle p1: particles) {
             center = center.plus(p1.pos);
+            p1.mass += 1;
         }
         mag = particles[0].pos.minus(center).length();
     }
@@ -58,16 +59,27 @@ public class Surface implements Force {
         float a2 = n2.length() / 2;
         float area = a1 + a2;
 
-        particles[0].norm = particles[0].norm.plus(n1.normalize()).normalize();
-        particles[1].norm = particles[1].norm.plus(n1.normalize()).normalize();
-        particles[2].norm = particles[2].norm.plus(n2.normalize()).normalize();
-        particles[3].norm = particles[3].norm.plus(n2.normalize()).normalize();
+        if (GLM.dot(n1,n2)<0) {
+            System.out.println("n1n2");
+        }
 
-        Vec3 vel2 = vel.times(vel.length()*1000);
-        Vec3 liftForce = normal.times(0.5f * GLM.dot(normal, vel2) * area * LIFT_FACTOR * dt);
+        particles[0].normSum = particles[0].normSum.plus(n1.normalize());
+        particles[1].normSum = particles[1].normSum.plus(n1.normalize());
+        particles[2].normSum = particles[2].normSum.plus(n2.normalize());
+        particles[3].normSum = particles[3].normSum.plus(n2.normalize());
+        particles[0].normCount += 1;
+        particles[1].normCount += 1;
+        particles[2].normCount += 1;
+        particles[3].normCount += 1;
+
+        //Vec3 vel2 = vel.times(vel.length()*1000);
+        //Vec3 liftForce = normal.times(0.5f * GLM.dot(normal, vel2) * area * LIFT_FACTOR * dt);
         // apply lift
         for (Particle p: particles) {
+            Vec3 vel2 = p.dxdt[order].times(p.dxdt[order].length()*1000);
+            Vec3 liftForce = p.norm.times(0.5f * GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass * dt);
             p.dxdt[order] = p.dxdt[order].plus(liftForce);
+            //p.dxdt[order] = p.dxdt[order].plus(liftForce.div(p.mass));
         }
     }
 

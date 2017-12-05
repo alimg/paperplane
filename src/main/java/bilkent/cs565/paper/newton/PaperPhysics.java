@@ -26,15 +26,16 @@ public class PaperPhysics {
             p.dxdt[order] = p.dxdt[order].plus(gravity.times(dt));
         }
 
+        float D = -20f;
         // apply collision forces
         for (Particle p: paper.getParticles()) {
-
-            if (p.pos.x < 5.5 && p.pos.z < -10)
+            Vec3 pos = p.pos(order);
+            if (pos.x < 8.5f && pos.z < D)
             {
-                if (p.pos.z > -10.3) {
-                    p.dxdt[order].z += (-10 - p.pos.z) * 2;
+                if (pos.z > D-.4) {
+                    p.dxdt[order].z += (float)dt*(Math.max(D - pos.z, 0.01f) * 1000.02f - p.dxdt[order].z * 2.9f);
+                    p.dxdt[order] = p.dxdt[order].minus(p.dxdt[order].times(dt * 22.9f));
                 }
-                p.dxdt[order] = p.dxdt[order].times(0.98);
             }
         }
     }
@@ -42,10 +43,14 @@ public class PaperPhysics {
     public void integrate(double dt) {
         for (Particle p: paper.getParticles()) {
             p.vel = p.dxdt[0].plus(p.dxdt[1].times(2)).plus(p.dxdt[2].times(2)).plus(p.dxdt[3]).div(6);
+            //paper.getParticles().get(0).vel = new Vec3();
             p.pos = p.pos.plus(p.vel);
             for (int i=0;i<4;i++) {
                 p.dxdt[i] = p.vel;
             }
+            p.norm = p.normSum.div(p.normCount);
+            p.normSum = new Vec3();
+            p.normCount = 0;
         }
     }
 }

@@ -2,6 +2,7 @@ package bilkent.cs565.paper;
 
 import bilkent.cs565.paper.gl.Constants;
 import bilkent.cs565.paper.model.Paper;
+import bilkent.cs565.paper.model.particle.Surface;
 import bilkent.cs565.paper.newton.PaperPhysics;
 import bilkent.cs565.paper.newton.Stepper;
 import bilkent.cs565.paper.model.particle.Particle;
@@ -24,12 +25,14 @@ import static uno.gl.GlErrorKt.checkError;
 
 public class World {
     private int elementCount;
+    private ShortBuffer surfaceBuffer;
 
     private interface Buffer {
         int VERTEX = 0;
         int ELEMENT = 1;
-        int GLOBAL_MATRICES = 2;
-        int MAX = 3;
+        int ELEMENT2 = 2;
+        int GLOBAL_MATRICES = 3;
+        int MAX = 4;
     }
 
     private final Paper paper;
@@ -39,14 +42,14 @@ public class World {
     private FloatBuffer vertexBuffer;
     private ShortBuffer elementBuffer;
     private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
-    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1);
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(2);
     private FloatBuffer matBuffer = GLBuffers.newDirectFloatBuffer(16);
 
 
     public World() {
         //paper = Paper.createFlat(15,15, 5, 5);
         //paper = Paper.createFlat(10, 10, 10, 10);
-        paper = Paper.createFlat(10, 10, 10, 10);
+        paper = Paper.createFlat(10, 10, 5, 5);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
 
@@ -72,6 +75,7 @@ public class World {
         elementCount = paper.getSpringForces().size() * 2 + paper.getParticles().size() * 2;
         vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount);
         elementBuffer = GLBuffers.newDirectShortBuffer(elementCount);
+        surfaceBuffer = GLBuffers.newDirectShortBuffer(paper.getSurfaces().size() * 6);
 
         int i = 0;
         for (Spring f: paper.getSpringForces()) {
@@ -82,6 +86,16 @@ public class World {
             elementBuffer.put(i++, (short) (p.id*2));
             elementBuffer.put(i++, (short) (p.id*2+1));
         }
+        i=0;
+        for (Surface f: paper.getSurfaces()) {
+            surfaceBuffer.put(i++, (short) (f.particles[0].id*2));
+            surfaceBuffer.put(i++, (short) (f.particles[1].id*2));
+            surfaceBuffer.put(i++, (short) (f.particles[2].id*2));
+            surfaceBuffer.put(i++, (short) (f.particles[2].id*2));
+            surfaceBuffer.put(i++, (short) (f.particles[3].id*2));
+            surfaceBuffer.put(i++, (short) (f.particles[0].id*2));
+        }
+
 
         gl.glGenBuffers(Buffer.MAX, bufferName);
 
@@ -91,6 +105,10 @@ public class World {
 
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer.capacity() * Short.BYTES, elementBuffer, GL_DYNAMIC_DRAW);
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT2));
+        gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, surfaceBuffer.capacity() * Short.BYTES, surfaceBuffer, GL_DYNAMIC_DRAW);
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
@@ -123,18 +141,20 @@ public class World {
             gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl.glBindVertexArray(0);
+        gl.glCullFace(GL_FRONT_AND_BACK);
         checkError(gl, "initVao");
     }
 
     public void draw(GL3 gl, Program program) {
-        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         synchronized(stepper) {
             for (Particle p : paper.getParticles())
             {
                 vertexBuffer.put(p.id * 6 * 2, p.pos.x);
                 vertexBuffer.put(p.id * 6 * 2 + 1, p.pos.y);
                 vertexBuffer.put(p.id * 6 * 2 + 2, p.pos.z);
-                vertexBuffer.put(p.id * 6 * 2 + 3, Math.abs(p.pos.z / 10));
+                vertexBuffer.put(p.id * 6 * 2 + 3, 0.2f);
+                vertexBuffer.put(p.id * 6 * 2 + 4, 0.2f);
+                vertexBuffer.put(p.id * 6 * 2 + 5, 0.2f);
 
 
                 vertexBuffer.put(p.id * 6 * 2 + 6, p.pos.x + p.norm.x);
@@ -149,14 +169,15 @@ public class World {
 
 
         Mat4x4 model = new Mat4x4();
-        model
-                .scale(0.50f)
-                .to(matBuffer);
+        model.scale(0.50f).to(matBuffer);
 
         gl.glUniformMatrix4fv(program.get("model"), 1, false, matBuffer);
 
         gl.glBindVertexArray(vertexArrayName.get(0));
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl.glDrawElements(GL_LINES, elementBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
+        //gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT2));
+        //gl.glDrawElements(GL_TRIANGLES, surfaceBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
         gl.glBindVertexArray(0);
 
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
