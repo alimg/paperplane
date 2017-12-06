@@ -37,20 +37,22 @@ public class PaperPhysics {
                     p.dxdt[order] = p.dxdt[order].minus(p.dxdt[order].times(dt * 22.9f));
                 }
             }
+            p.norm = p.normSum.div(p.normCount);
+            p.normSum = new Vec3();
+            p.normCount = 0;
         }
     }
 
     public void integrate(double dt) {
         for (Particle p: paper.getParticles()) {
             p.vel = p.dxdt[0].plus(p.dxdt[1].times(2)).plus(p.dxdt[2].times(2)).plus(p.dxdt[3]).div(6);
+            //if (p.id>10)
+            //    p.vel = new Vec3();
             //paper.getParticles().get(0).vel = new Vec3();
             p.pos = p.pos.plus(p.vel);
             for (int i=0;i<4;i++) {
                 p.dxdt[i] = p.vel;
             }
-            p.norm = p.normSum.div(p.normCount);
-            p.normSum = new Vec3();
-            p.normCount = 0;
         }
     }
 }

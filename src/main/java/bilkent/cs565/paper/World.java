@@ -36,7 +36,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -0.3);
+    private final Vec3 gravity = new Vec3(0, 0, -0.4);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;
@@ -49,7 +49,7 @@ public class World {
     public World() {
         //paper = Paper.createFlat(15,15, 5, 5);
         //paper = Paper.createFlat(10, 10, 10, 10);
-        paper = Paper.createFlat(10, 10, 5, 5);
+        paper = Paper.createFlat(8, 8, 5, 5);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
 
@@ -65,7 +65,7 @@ public class World {
         }
         synchronized(stepper)
         {
-            stepper.step(0.001);
+            stepper.step(0.0001);
         }
         time = newTime;
     }

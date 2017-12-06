@@ -6,7 +6,7 @@ import glm.vec._3.Vec3;
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -16.0f;
+    private static final float LIFT_FACTOR = -90.0f;
     private final float mag;
 
     public final Particle[] particles;

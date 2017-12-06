@@ -33,7 +33,7 @@ public class Paper {
         for (int x = 0; x < n; x++) {
             for (int y = 0; y < m; y++) {
                 Particle p = new Particle(particles.size());
-                p.pos = new Vec3(x*X/n, y*Y/m, Math.random()*0.21 + x*0.01*X/n+ 4);
+                p.pos = new Vec3(x*X/n, y*Y/m, Math.random()*0.0021 + x*0.01*X/n+ 4);
                 p.norm = new Vec3(0, 0, 1);
                 p.dir = new Vec3(0, -1, 0);
                 p.vel = new Vec3(0.2f,0.1f,0);
