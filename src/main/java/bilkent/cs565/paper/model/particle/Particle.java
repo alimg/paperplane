@@ -5,7 +5,7 @@ import glm.mat.Mat4x4;
 
 public class Particle {
     public final int id;
-    public float mass = -0.05f;
+    public float mass = 0;
     public Mat4x4 orientation = new Mat4x4();
     public Vec3 pos = new Vec3();
     public Vec3 norm = new Vec3();
@@ -34,5 +34,11 @@ public class Particle {
                 return pos.plus(dxdt[order - 1]);
         }
         return pos;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Integer.hashCode(id);
     }
 }

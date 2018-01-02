@@ -159,7 +159,7 @@ public class Main implements GLEventListener, KeyListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        cam.plus(camV.times(10));
+        cam = cam.plus(camV.times(-0.01f));
         GL3 gl = drawable.getGL().getGL3();
         gl.glBindBufferBase(GL_UNIFORM_BUFFER, Constants.Uniform.GLOBAL_MATRICES, bufferName.get(Buffer.GLOBAL_MATRICES));
 
@@ -269,10 +269,10 @@ public class Main implements GLEventListener, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         cam = cam.plus(camV.times(0.1));
-        System.out.println(e.getKeyCode());
-        if( !e.isPrintableKey() || e.isAutoRepeat() ) {
+        if( !e.isPrintableKey() || e.isAutoRepeat()  ) {
             return;
         }
+        System.out.println(e.getKeyCode());
         switch (e.getKeyCode()) {
             case KeyEvent.VK_W:
                 camV = camV.minus(camDir);

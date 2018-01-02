@@ -55,8 +55,11 @@ public class PaperPhysics {
             Vec3 dvdt = p.dvdt[1].plus(p.dvdt[2].plus(p.dvdt[3]).times(2)).plus(p.dvdt[4]).div(6);
             Vec3 dxdt = p.dxdt[1].plus(p.dxdt[2].plus(p.dxdt[3]).times(2)).plus(p.dxdt[4]).div(6);
             p.vel = p.vel.plus(dvdt.times(dt));
-            if (p.id < 32 )
-                p.vel = new Vec3();
+            //if (p.id < 32 )
+            //{
+            //    p.vel = new Vec3();
+            //    dxdt = new Vec3();
+            //}
             //paper.getParticles().get(0).vel = new Vec3();
             p.pos = p.pos.plus(dxdt.times(dt));
             for (int i = 0; i < 5; i++) {

@@ -49,8 +49,8 @@ public class World {
 
     public World() {
         //paper = Paper.createFlat(15,15, 5, 5);
-        paper = Paper.createFlat(16, 16, 5, 5);
-        //paper = Paper.createFlat(8, 8, 5, 5);
+        //paper = Paper.createFlat(16, 16, 5, 5);
+        paper = Paper.createFlat(8, 8, 2, 2);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
 
@@ -76,7 +76,7 @@ public class World {
         elementCount = paper.getSpringForces().size() * 2 + paper.getParticles().size() * 2;
         vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount);
         elementBuffer = GLBuffers.newDirectShortBuffer(elementCount);
-        surfaceBuffer = GLBuffers.newDirectShortBuffer(paper.getSurfaces().size() * 6);
+        surfaceBuffer = GLBuffers.newDirectShortBuffer(paper.getSurfaces().size() * 3);
 
         int i = 0;
         for (Spring f: paper.getSpringForces()) {
@@ -92,9 +92,6 @@ public class World {
             surfaceBuffer.put(i++, (short) (f.particles[0].id*2));
             surfaceBuffer.put(i++, (short) (f.particles[1].id*2));
             surfaceBuffer.put(i++, (short) (f.particles[2].id*2));
-            surfaceBuffer.put(i++, (short) (f.particles[2].id*2));
-            surfaceBuffer.put(i++, (short) (f.particles[3].id*2));
-            surfaceBuffer.put(i++, (short) (f.particles[0].id*2));
         }
 
 
