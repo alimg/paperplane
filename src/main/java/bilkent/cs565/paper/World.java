@@ -24,6 +24,7 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static uno.gl.GlErrorKt.checkError;
 
 public class World {
+    public static final float STEP_SIZE = 0.01f;
     private int elementCount;
     private ShortBuffer surfaceBuffer;
 
@@ -36,7 +37,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -0.4);
+    private final Vec3 gravity = new Vec3(0, 0, -3.);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;
@@ -48,8 +49,8 @@ public class World {
 
     public World() {
         //paper = Paper.createFlat(15,15, 5, 5);
-        //paper = Paper.createFlat(10, 10, 10, 10);
-        paper = Paper.createFlat(8, 8, 5, 5);
+        paper = Paper.createFlat(16, 16, 5, 5);
+        //paper = Paper.createFlat(8, 8, 5, 5);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
 
@@ -65,7 +66,7 @@ public class World {
         }
         synchronized(stepper)
         {
-            stepper.step(0.0001);
+            stepper.step(STEP_SIZE);
         }
         time = newTime;
     }

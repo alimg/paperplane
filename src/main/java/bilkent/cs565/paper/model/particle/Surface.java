@@ -6,7 +6,7 @@ import glm.vec._3.Vec3;
 
 public class Surface implements Force {
 
-    private static final float LIFT_FACTOR = -90.0f;
+    private static final float LIFT_FACTOR = -10.18f;
     private final float mag;
 
     public final Particle[] particles;
@@ -39,9 +39,9 @@ public class Surface implements Force {
         Vec3 center = new Vec3();
 
         for (Particle p: particles) {
-            vel = vel.plus(p.dxdt[order]);
+            vel = vel.plus(p.vel.plus(p.dvdt[order-1].times(dt)));
             normal = normal.plus(p.norm);
-            center = center.plus(p.pos);
+            center = center.plus(p.pos.plus(p.dxdt[order-1].times(dt)));
         }
 
         vel = vel.div(particles.length);
@@ -72,14 +72,12 @@ public class Surface implements Force {
         particles[2].normCount += 1;
         particles[3].normCount += 1;
 
-        //Vec3 vel2 = vel.times(vel.length()*1000);
-        //Vec3 liftForce = normal.times(0.5f * GLM.dot(normal, vel2) * area * LIFT_FACTOR * dt);
         // apply lift
         for (Particle p: particles) {
-            Vec3 vel2 = p.dxdt[order].times(p.dxdt[order].length()*1000);
-            Vec3 liftForce = p.norm.times(0.5f * GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass * dt);
-            p.dxdt[order] = p.dxdt[order].plus(liftForce);
-            //p.dxdt[order] = p.dxdt[order].plus(liftForce.div(p.mass));
+            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt));
+            vel2 = vel2.times(vel2.length());
+            Vec3 liftImpulse = p.norm.times(0.5f * GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass);
+            p.dvdt[order] = p.dvdt[order].plus(liftImpulse);
         }
     }
 

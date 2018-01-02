@@ -16,25 +16,32 @@ public class PaperPhysics {
     }
 
     public void step(double dt, int order) {
+        // apply gravity
+        for (Particle p : paper.getParticles()) {
+            //Vec3 x = p.pos.plus(p.dxdt[order-1].times(dt));
+            Vec3 v = p.vel.plus(p.dvdt[order-1].times(dt));
+            p.dxdt[order] = v;
+            p.dvdt[order] = gravity;
+        }
+
         // apply spring forces
-        for (Force s: paper.getForces()) {
+        for (Force s : paper.getForces()) {
             s.step(dt, order);
         }
 
-        // apply gravity
-        for (Particle p: paper.getParticles()) {
-            p.dxdt[order] = p.dxdt[order].plus(gravity.times(dt));
-        }
 
         float D = -20f;
         // apply collision forces
         for (Particle p: paper.getParticles()) {
-            Vec3 pos = p.pos(order);
+            Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));
             if (pos.x < 8.5f && pos.z < D)
             {
                 if (pos.z > D-.4) {
-                    p.dxdt[order].z += (float)dt*(Math.max(D - pos.z, 0.01f) * 1000.02f - p.dxdt[order].z * 2.9f);
-                    p.dxdt[order] = p.dxdt[order].minus(p.dxdt[order].times(dt * 22.9f));
+                    Vec3 v = p.vel.plus(p.dvdt[order-1].times(dt));
+                    Vec3 f = new Vec3(0,0, ((D - pos.z) * 500.02f))
+                            .plus(v.times(-15.1f));
+                    //p.dxdt[order] = p.dxdt[order].plus(v);
+                    p.dvdt[order] = p.dvdt[order].plus(f);
                 }
             }
             p.norm = p.normSum.div(p.normCount);
@@ -43,15 +50,18 @@ public class PaperPhysics {
         }
     }
 
-    public void integrate(double dt) {
-        for (Particle p: paper.getParticles()) {
-            p.vel = p.dxdt[0].plus(p.dxdt[1].times(2)).plus(p.dxdt[2].times(2)).plus(p.dxdt[3]).div(6);
-            //if (p.id>10)
-            //    p.vel = new Vec3();
+    public void integrate(float dt) {
+        for (Particle p : paper.getParticles()) {
+            Vec3 dvdt = p.dvdt[1].plus(p.dvdt[2].plus(p.dvdt[3]).times(2)).plus(p.dvdt[4]).div(6);
+            Vec3 dxdt = p.dxdt[1].plus(p.dxdt[2].plus(p.dxdt[3]).times(2)).plus(p.dxdt[4]).div(6);
+            p.vel = p.vel.plus(dvdt.times(dt));
+            if (p.id < 32 )
+                p.vel = new Vec3();
             //paper.getParticles().get(0).vel = new Vec3();
-            p.pos = p.pos.plus(p.vel);
-            for (int i=0;i<4;i++) {
-                p.dxdt[i] = p.vel;
+            p.pos = p.pos.plus(dxdt.times(dt));
+            for (int i = 0; i < 5; i++) {
+                p.dxdt[i] = new Vec3();
+                p.dvdt[i] = new Vec3();
             }
         }
     }

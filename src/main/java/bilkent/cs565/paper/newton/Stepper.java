@@ -7,12 +7,12 @@ public class Stepper {
         this.paper = paperP;
     }
 
-    public void step(double dt) {
-        paper.step(0, 0);
-        paper.step(dt*0.5, 1);
+    public void step(float dt) {
+        paper.step(0, 1);
         paper.step(dt*0.5, 2);
-        paper.step(dt, 3);
+        paper.step(dt*0.5, 3);
+        paper.step(dt, 4);
         paper.integrate(dt);
-
+        //System.out.println(paper.paper.getParticles().get(0).vel.length());
     }
 }

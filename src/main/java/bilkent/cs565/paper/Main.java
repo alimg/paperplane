@@ -41,6 +41,12 @@ public class Main implements GLEventListener, KeyListener {
     private final World world;
     private Thread thread;
     private AtomicBoolean running = new AtomicBoolean(true);
+    private Vec3 cam = new Vec3();
+    private Vec3 camV = new Vec3();
+    private Vec3 camDir = new Vec3(0,0,1);
+    private Vec3 camNorm = new Vec3(0,1,0);
+    private float camRx = 0;
+    private float camRz = 0;
 
     public Main() {
         world = new World();
@@ -153,6 +159,7 @@ public class Main implements GLEventListener, KeyListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        cam.plus(camV.times(10));
         GL3 gl = drawable.getGL().getGL3();
         gl.glBindBufferBase(GL_UNIFORM_BUFFER, Constants.Uniform.GLOBAL_MATRICES, bufferName.get(Buffer.GLOBAL_MATRICES));
 
@@ -160,13 +167,14 @@ public class Main implements GLEventListener, KeyListener {
         float diff = (float) (now - start) / 1_000f;
         // view matrix
         {
-            diff = Math.max(0,diff-10);
+            diff = Math.max(0,diff-4);
             Mat4x4 view = new Mat4x4();
             view = view.scale((float)(0.15f + 0.025f*(1/(1+diff) -1)));
             view = view.scale(1,1,0.1f);
-            view = view.rotate((float) (Math.PI/4.0f), -1,0,0);
+            view = view.rotate((float) (Math.PI/4.0f) - camRx, -1,0, -camRz);
             //view = view.translate(0,0,-1f);
             view = view.translate(-2.5f, 15+ diff*0.1f,-10);
+            view = view.translate(cam);
             view.to(matBuffer);
 
             gl.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.GLOBAL_MATRICES));
@@ -224,9 +232,60 @@ public class Main implements GLEventListener, KeyListener {
             running.set(false);
             new Thread(() -> window.destroy()).start();
         }
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                camRx+=0.1;
+                break;
+            case KeyEvent.VK_DOWN:
+                camRx-=0.1;
+                break;
+            case KeyEvent.VK_LEFT:
+                camRz+=0.1;
+                break;
+            case KeyEvent.VK_RIGHT:
+                camRz-=0.1;
+                break;
+            case KeyEvent.VK_R:
+                camV = camV.plus(camNorm);
+                break;
+            case KeyEvent.VK_H:
+                camV = camV.minus(camNorm);
+                break;
+            case KeyEvent.VK_W:
+                camV = camV.plus(camDir);
+                break;
+            case KeyEvent.VK_S:
+                camV = camV.minus(camDir);
+                break;
+            case KeyEvent.VK_A:
+                camV = camV.minus(camDir.cross(camNorm));
+                break;
+            case KeyEvent.VK_D:
+                camV = camV.plus(camDir.cross(camNorm));
+                break;
+        };
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        cam = cam.plus(camV.times(0.1));
+        System.out.println(e.getKeyCode());
+        if( !e.isPrintableKey() || e.isAutoRepeat() ) {
+            return;
+        }
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W:
+                camV = camV.minus(camDir);
+                break;
+            case KeyEvent.VK_S:
+                camV = camV.plus(camDir);
+                break;
+            case KeyEvent.VK_A:
+                camV = camV.plus(camDir.cross(camNorm));
+                break;
+            case KeyEvent.VK_D:
+                camV = camV.minus(camDir.cross(camNorm));
+                break;
+        }
     }
 }

@@ -14,12 +14,14 @@ public class Particle {
     public Vec3 dir = new Vec3();
     public Vec3 vel = new Vec3();
 
-    public Vec3 dxdt[] = new Vec3[4];
+    public Vec3 dxdt[] = new Vec3[5];
+    public Vec3 dvdt[] = new Vec3[5];
 
     public Particle(int id) {
         this.id = id;
         for (int i=0;i<dxdt.length;i++) {
             dxdt[i] = new Vec3();
+            dvdt[i] = new Vec3();
         }
     }
 
