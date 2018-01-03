@@ -2,12 +2,13 @@ package bilkent.cs565.paper.model.particle;
 
 import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
+import glm_.detail.Random;
 
 
 public class Surface implements Force {
 
-    private static final float DENSITY = 10;
-    private static final float LIFT_FACTOR = -408.18f;
+    private static final float DENSITY = 1;
+    private static final float LIFT_FACTOR = -2f;
     private final float mag;
 
     public final Particle[] particles;
@@ -26,6 +27,7 @@ public class Surface implements Force {
         for (Particle p1: particles) {
             center = center.plus(p1.pos);
             p1.mass += 1;
+            //p1.mass += c1.cross(c2).length()/2 * DENSITY;
         }
         mag = particles[0].pos.minus(center).length();
     }
@@ -62,9 +64,10 @@ public class Surface implements Force {
 
         // apply lift
         for (Particle p: particles) {
-            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt));
+            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt))
+                    .plus(Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat());
             vel2 = vel2.times(vel2.length());
-            Vec3 liftImpulse = p.norm.times(0.5f * GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass);
+            Vec3 liftImpulse = p.norm.times(GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass);
             p.dvdt[order] = p.dvdt[order].plus(liftImpulse);
         }
     }

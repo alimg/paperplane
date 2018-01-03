@@ -30,16 +30,16 @@ public class PaperPhysics {
         }
 
 
-        float D = -20f;
+        float D = -5f;
         // apply collision forces
         for (Particle p: paper.getParticles()) {
             Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));
-            if (pos.x < 8.5f && pos.z < D)
+            if (pos.x < 0.5f && pos.z < D)
             {
-                if (pos.z > D-.4) {
+                if (pos.z > D-.2) {
                     Vec3 v = p.vel.plus(p.dvdt[order-1].times(dt));
                     Vec3 f = new Vec3(0,0, ((D - pos.z) * 500.02f))
-                            .plus(v.times(-15.1f));
+                            .plus(v.times(-1.5f));
                     //p.dxdt[order] = p.dxdt[order].plus(v);
                     p.dvdt[order] = p.dvdt[order].plus(f);
                 }
@@ -55,7 +55,7 @@ public class PaperPhysics {
             Vec3 dvdt = p.dvdt[1].plus(p.dvdt[2].plus(p.dvdt[3]).times(2)).plus(p.dvdt[4]).div(6);
             Vec3 dxdt = p.dxdt[1].plus(p.dxdt[2].plus(p.dxdt[3]).times(2)).plus(p.dxdt[4]).div(6);
             p.vel = p.vel.plus(dvdt.times(dt));
-            //if (p.id < 32 )
+            //if (p.id <= 16 )
             //{
             //    p.vel = new Vec3();
             //    dxdt = new Vec3();

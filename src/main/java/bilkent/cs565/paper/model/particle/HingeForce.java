@@ -1,11 +1,12 @@
 package bilkent.cs565.paper.model.particle;
 
 import bilkent.cs565.paper.gl.GLM;
+import com.jogamp.opengl.GL;
 import glm.vec._3.Vec3;
 
 public class HingeForce implements Force
 {
-    private static final float STIFFNESS = 500.f;
+    private static final float STIFFNESS = 400.0f;
     private final Particle edgeA;
     private final Particle edgeB;
     private final float med;
@@ -21,22 +22,25 @@ public class HingeForce implements Force
         this.pa = pa;
         this.pb = pb;
 
-        final Vec3 eapa = edgeA.pos.minus(pa.pos).times(-1);
-        final Vec3 papb = pb.pos.minus(pa.pos).normalize();
+        // http://morroworks.com/Content/Docs/Rays%20closest%20point.pdf
+        final Vec3 c = pa.pos.minus(edgeA.pos);
+        final Vec3 d = pb.pos.minus(pa.pos).normalize();
         final Vec3 e = edgeB.pos.minus(edgeA.pos).normalize();
-        // a/sina = b/sinb = c/sinc
-        final float cosa = GLM.dot(e, papb);
-        final float sina = (float) Math.sqrt(1-cosa*cosa);
-        final float cosb = GLM.dot(eapa.normalize(), papb);
-        final float sinb = (float) Math.sqrt(1-cosb*cosb);
-        final float ed = eapa.length() * sinb / sina;
+        final float ed = (-GLM.dot(e, d) * GLM.dot(d, c) + GLM.dot(e, c) * GLM.dot(d, d)) /
+                (GLM.dot(e, e) * GLM.dot(d, d) - GLM.dot(e, d) * GLM.dot(e, d));
+        //final float ed = GLM.dot(edgeA.pos.minus(pa.pos), e.cross(d))/e.cross(d).length();
         med = ed;
         final Vec3 pivot = edgeA.pos.plus(e.times(ed));
         final Vec3 f = pa.pos.minus(pivot);
         final Vec3 g = pb.pos.minus(pivot);
 
         int dir = (GLM.dot(e, f.cross(g))>0) ? 1 : -1;
-        float cos = GLM.dot(f, g)/(f.length() + g.length());
+        float cos = GLM.dot(f, g)/(f.length() * g.length());
+        if (cos>1) {
+            cos = 1f;
+        } else if (cos<-1) {
+            cos = -1f;
+        }
         rest = (float) (Math.PI - Math.acos(cos)) * dir;
         if (Float.isNaN(rest)) {
             System.out.println(this);
@@ -56,35 +60,47 @@ public class HingeForce implements Force
         Vec3 posPB = pb.pos.plus(pb.dxdt[order-1].times(dt));
         Vec3 velPB = pb.vel.plus(pb.dvdt[order-1].times(dt));
 
-        final Vec3 eapa = posEA.minus(posPA);
-        final Vec3 papb = posPB.minus(posPA).normalize();
+
+        final Vec3 c = posPA.minus(posEA);
+        final Vec3 d = posPB.minus(posPA).normalize();
         Vec3 e = posEB.minus(posEA);
         final float elen = e.length();
         e = e.normalize();
-        // a/sina = b/sinb = c/sinc
 
-        final float cosa = GLM.dot(e, papb);
-        final float sina = (float) Math.sqrt(1-cosa*cosa);
-        final float cosb = GLM.dot(eapa.normalize(), papb);
-        final float sinb = (float) Math.sqrt(1-cosb*cosb);
-        final float ed = eapa.length() * sinb / sina;
+        float ed = (-GLM.dot(e, d) * GLM.dot(d, c) + GLM.dot(e, c) * GLM.dot(d, d)) /
+                (GLM.dot(e, e) * GLM.dot(d, d) - GLM.dot(e, d) * GLM.dot(e, d));
+        if (Float.isNaN(ed)) {
+            ed = 0;
+        }
+
         final Vec3 pivot = posEA.plus(e.times(ed));
         final Vec3 f = posPA.minus(pivot);
         final Vec3 g = posPB.minus(pivot);
 
         int dir = (GLM.dot(e, f.cross(g))>0) ? 1 : -1;
-        double cos = GLM.dot(f, g)/Math.sqrt(f.length() * g.length());
+        float cos = GLM.dot(f, g)/(f.length() * g.length());
+        if (cos>1) {
+            cos = 1f;
+        } else if (cos<-1) {
+            cos = -1f;
+        }
         float angle = (float) (Math.PI - Math.acos(cos)) * dir;
         if (Float.isNaN(angle)) {
             angle = 0;
         }
         angle = rest - angle;
 
-        final Vec3 normPA = f.cross(e);
-        final Vec3 normPB = e.cross(g);
+        float torque = angle * -STIFFNESS;
 
-        Vec3 fa = normPA.times(angle * -STIFFNESS);
-        Vec3 fb = normPB.times(angle * -STIFFNESS);
+        final Vec3 normPA = f.cross(e).normalize();
+        final Vec3 normPB = e.cross(g).normalize();
+
+        float fl = f.length();
+        float gl = g.length();
+
+        Vec3 fa = normPA.times(torque/fl);
+        Vec3 fb = normPB.times(torque/gl);
+
 
         pa.dvdt[order] = pa.dvdt[order].plus(fa.div(pa.mass));
         pb.dvdt[order] = pb.dvdt[order].plus(fb.div(pb.mass));

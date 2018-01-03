@@ -24,9 +24,11 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static uno.gl.GlErrorKt.checkError;
 
 public class World {
-    public static final float STEP_SIZE = 0.01f;
+    public static final float STEP_SIZE = 0.02f;
     private int elementCount;
     private ShortBuffer surfaceBuffer;
+    private int frames;
+    private int framesD;
 
     private interface Buffer {
         int VERTEX = 0;
@@ -37,7 +39,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -3.);
+    private final Vec3 gravity = new Vec3(0, 0, -30.);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;
@@ -50,7 +52,9 @@ public class World {
     public World() {
         //paper = Paper.createFlat(15,15, 5, 5);
         //paper = Paper.createFlat(16, 16, 5, 5);
-        paper = Paper.createFlat(8, 8, 2, 2);
+        //paper = Paper.createFlat(24, 24, 6, 6);
+        paper = Paper.createFlat(12, 12, 6, 6);
+        //paper = Paper.createFlat(8, 8, 6, 6);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
 
@@ -60,6 +64,10 @@ public class World {
     public void update() {
         long newTime = System.nanoTime();
         float dt = (newTime - time) / 1000000000.0f;
+        if (((long)time/1000000000) < (newTime/1000000000) ) {
+            System.out.println(String.format("%d %d", framesD, frames));
+            framesD = 0;
+        }
         if (dt > 0.1) {
             // limit time step to 100msec
             dt = 0.1f;
@@ -68,6 +76,8 @@ public class World {
         {
             stepper.step(STEP_SIZE);
         }
+        frames += 1;
+        framesD += 1;
         time = newTime;
     }
 
