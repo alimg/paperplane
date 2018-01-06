@@ -64,10 +64,11 @@ public class Surface implements Force {
 
         // apply lift
         for (Particle p: particles) {
-            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt))
-                    .plus(Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat());
+            Vec3 vel2 = vel//p.vel.plus(p.dvdt[order-1].times(dt))
+                    //.plus(Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat());
+            ;
             vel2 = vel2.times(vel2.length());
-            Vec3 liftImpulse = p.norm.times(GLM.dot(p.norm, vel2) * area * LIFT_FACTOR / p.mass);
+            Vec3 liftImpulse = n1.times(GLM.dot(n1, vel2) * area * LIFT_FACTOR / p.mass);
             p.dvdt[order] = p.dvdt[order].plus(liftImpulse);
         }
     }

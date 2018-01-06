@@ -24,7 +24,7 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static uno.gl.GlErrorKt.checkError;
 
 public class World {
-    public static final float STEP_SIZE = 0.02f;
+    public static final float STEP_SIZE = 1/120f;
     private int elementCount;
     private ShortBuffer surfaceBuffer;
     private int frames;
@@ -39,7 +39,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -30.);
+    private final Vec3 gravity = new Vec3(0, 0, -0.9);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;
@@ -53,7 +53,8 @@ public class World {
         //paper = Paper.createFlat(15,15, 5, 5);
         //paper = Paper.createFlat(16, 16, 5, 5);
         //paper = Paper.createFlat(24, 24, 6, 6);
-        paper = Paper.createFlat(12, 12, 6, 6);
+        //paper = Paper.createFlat(12, 12, 1.5f, 1.5f);
+        paper = Paper.createFromModel();
         //paper = Paper.createFlat(8, 8, 6, 6);
         PaperPhysics paperP = new PaperPhysics(paper, gravity);
         stepper = new Stepper(paperP);
@@ -165,9 +166,9 @@ public class World {
                 vertexBuffer.put(p.id * 6 * 2 + 5, 0.2f);
 
 
-                vertexBuffer.put(p.id * 6 * 2 + 6, p.pos.x + p.norm.x);
-                vertexBuffer.put(p.id * 6 * 2 + 6 + 1, p.pos.y + p.norm.y);
-                vertexBuffer.put(p.id * 6 * 2 + 6 + 2, p.pos.z + p.norm.z);
+                vertexBuffer.put(p.id * 6 * 2 + 6, p.pos.x + p.norm.x*0.1f);
+                vertexBuffer.put(p.id * 6 * 2 + 6 + 1, p.pos.y + p.norm.y*0.1f);
+                vertexBuffer.put(p.id * 6 * 2 + 6 + 2, p.pos.z + p.norm.z*0.1f);
                 vertexBuffer.put(p.id * 6 * 2 + 6 + 5, 1);
             }
         }

@@ -5,7 +5,7 @@ apply plugin: 'kotlin'
 
 buildscript {
 
-    ext.kotlin_version = '1.2.0'
+    ext.kotlin_version = '1.2.10'
 
     repositories {
         mavenCentral()
@@ -30,6 +30,8 @@ dependencies {
 
     compile "org.jogamp.gluegen:gluegen-rt-main:$joglVersion"
     compile "org.jogamp.jogl:jogl-all-main:$joglVersion"
+
+    compile group: 'org.smurn', name: 'jply', version: '0.2.0'
 }
 
 repositories {

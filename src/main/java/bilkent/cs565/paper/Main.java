@@ -215,6 +215,7 @@ public class Main implements GLEventListener, KeyListener {
     @Override
     public void display(GLAutoDrawable drawable) {
         world.update();
+        world.update();
         Mat4x4 mat = new Mat4x4();
         camProj.inverse(mat);
         cam = cam.plus(mat.times(new Vec4(camV, 0).times(CAM_SPEED)));

@@ -30,7 +30,7 @@ public class PaperPhysics {
         }
 
 
-        float D = -5f;
+        float D = -50f;
         // apply collision forces
         for (Particle p: paper.getParticles()) {
             Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));

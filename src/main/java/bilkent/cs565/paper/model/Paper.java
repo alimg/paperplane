@@ -7,7 +7,13 @@ import bilkent.cs565.paper.model.particle.Particle;
 import bilkent.cs565.paper.model.particle.Spring;
 import bilkent.cs565.paper.model.particle.Surface;
 import glm.vec._3.Vec3;
+import org.smurn.jply.*;
+import org.smurn.jply.util.NormalMode;
+import org.smurn.jply.util.NormalizingPlyReader;
+import org.smurn.jply.util.TesselationMode;
+import org.smurn.jply.util.TextureMode;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +37,76 @@ public class Paper {
                 surfaces.add((Surface) f);
             }
         });
+    }
+
+    public static Paper createFromModel() {
+        ArrayList<Particle> particles = new ArrayList<>();
+        ArrayList<Force> forces = new ArrayList<>();
+        HashMap<Edge, Particle> hingeEdges = new HashMap<>();
+        try {
+            NormalizingPlyReader ply = new NormalizingPlyReader(new PlyReaderFile(
+                    ClassLoader.getSystemResourceAsStream("model/plane.ply")),
+                    TesselationMode.TRIANGLES,
+                    NormalMode.ADD_NORMALS_CCW,
+                    TextureMode.XY
+            );
+
+            int vertexCount = ply.getElementCount("vertex");
+            int triangleCount = ply.getElementCount("face");
+
+            ElementReader reader = ply.nextElementReader();
+            while (reader != null) {
+                ElementType type = reader.getElementType();
+                if (type.getName().equals("vertex")) {
+                    Element element = reader.readElement();
+                    while (element != null) {
+                        Particle p = new Particle(particles.size());
+                        p.pos = new Vec3(element.getDouble("x"),
+                                element.getDouble("y"),
+                                element.getDouble("z"));
+                        particles.add(p);
+                        element = reader.readElement();
+                    }
+                } else if (type.getName().equals("face")) {
+                    Element triangle = reader.readElement();
+                    while (triangle != null) {
+                        int[] indices = triangle.getIntList("vertex_index");
+                        assert indices.length == 3;
+                        Spring s1 = new Spring();
+                        s1.p1 = particles.get(indices[0]);
+                        s1.p2 = particles.get(indices[1]);
+                        s1.reset();
+                        forces.add(s1);
+                        Spring s2 = new Spring();
+                        s2.p1 = particles.get(indices[1]);
+                        s2.p2 = particles.get(indices[2]);
+                        s2.reset();
+                        forces.add(s2);
+                        Spring s3 = new Spring();
+                        s3.p1 = particles.get(indices[2]);
+                        s3.p2 = particles.get(indices[0]);
+                        s3.reset();
+                        forces.add(s3);
+
+                        Surface f = Surface.create(
+                                particles.get(indices[0]),
+                                particles.get(indices[1]),
+                                particles.get(indices[2]));
+                        forces.add(f);
+                        addHinges(f, hingeEdges, forces);
+                        triangle = reader.readElement();
+                    }
+                }
+
+                reader.close();
+                reader = ply.nextElementReader();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new Paper(particles, forces);
     }
 
     public static Paper createFlat(int n, int m, float X, float Y) {

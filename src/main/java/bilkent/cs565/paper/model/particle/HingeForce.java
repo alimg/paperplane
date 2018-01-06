@@ -6,7 +6,7 @@ import glm.vec._3.Vec3;
 
 public class HingeForce implements Force
 {
-    private static final float STIFFNESS = 400.0f;
+    private static final float STIFFNESS = 100.0f;
     private final Particle edgeA;
     private final Particle edgeB;
     private final float med;
