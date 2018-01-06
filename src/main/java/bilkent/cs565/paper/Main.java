@@ -42,7 +42,7 @@ public class Main implements GLEventListener, KeyListener {
     private final World world;
     private Thread thread;
     private AtomicBoolean running = new AtomicBoolean(true);
-    private Vec4 cam = new Vec4();
+    private Vec4 cam = new Vec4(0, -3, -40, 0);
     private Vec3 camV = new Vec3();
     private Mat4x4 camProj = new Mat4x4();
     private Vec3 camDir = new Vec3(0,0,1);
@@ -217,6 +217,7 @@ public class Main implements GLEventListener, KeyListener {
     public void display(GLAutoDrawable drawable) {
         world.update();
         world.update();
+        world.update();
         Mat4x4 mat = new Mat4x4();
         camProj.inverse(mat);
         cam = cam.plus(mat.times(new Vec4(camV, 0).times(CAM_SPEED)));
@@ -231,7 +232,7 @@ public class Main implements GLEventListener, KeyListener {
             Mat4x4 proj = glm.perspective((float) (Math.PI * 0.25f), 4.0f/3.0f, 0.1f, 1000.0f);
             Mat4x4 view = camProj;
             view = view.translate(cam.x, cam.y, cam.z);
-            view = view.translate(0,0,-10);
+            //view = view.translate(0,0,0);
             view = view.rotate((float) ( Math.PI/2), new Vec3(-1.0f, 0.0f, 0.0f));
             proj.times(view).to(matBuffer);
 

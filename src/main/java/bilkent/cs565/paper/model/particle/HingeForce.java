@@ -7,7 +7,7 @@ import glm.vec._3.Vec3;
 public class HingeForce implements Force
 {
     private static final float STIFFNESS = 20.1f;
-    private static final float DAMPING = 0.4f;
+    private static final float DAMPING = 0.1f;
     private final Particle edgeA;
     private final Particle edgeB;
     private final float med;
@@ -101,8 +101,9 @@ public class HingeForce implements Force
 
         float fl = f.length();
         float gl = g.length();
-
-
+        if (fl < 0.00001f || gl < 0.00001f) {
+            return;
+        }
         Vec3 vpivot = velEA.times((1.f - ed/elen)).plus(velEB.times(ed));
         Vec3 vlina = normPA.times(GLM.dot(normPA, velPA.minus(vpivot)));
         Vec3 vlinb = normPB.times(GLM.dot(normPB, velPB.minus(vpivot)));

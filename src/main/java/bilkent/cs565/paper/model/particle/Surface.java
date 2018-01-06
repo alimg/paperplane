@@ -8,7 +8,7 @@ import glm_.detail.Random;
 public class Surface implements Force {
 
     private static final float DENSITY = 1;
-    private static final float LIFT_FACTOR = -1.901f;
+    private static final float LIFT_FACTOR = -2.901f;
     private final float mag;
 
     public final Particle[] particles;

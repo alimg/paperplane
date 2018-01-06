@@ -6,7 +6,7 @@ import glm.vec._3.Vec3;
 
 public class Wall {
     private static final float BOUNCE = 10;
-    private static final float DAMP = 1;
+    private static final float DAMP = 10;
     private final Vec3 pos;
     private final Vec3 norm;
 

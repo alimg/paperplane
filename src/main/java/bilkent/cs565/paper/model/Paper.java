@@ -45,7 +45,7 @@ public class Paper {
         HashMap<Edge, Particle> hingeEdges = new HashMap<>();
         try {
             NormalizingPlyReader ply = new NormalizingPlyReader(new PlyReaderFile(
-                    ClassLoader.getSystemResourceAsStream("model/plane.ply")),
+                    ClassLoader.getSystemResourceAsStream("model/plane2.ply")),
                     TesselationMode.TRIANGLES,
                     NormalMode.ADD_NORMALS_CCW,
                     TextureMode.XY
