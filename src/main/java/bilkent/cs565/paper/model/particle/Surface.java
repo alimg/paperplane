@@ -8,7 +8,7 @@ import glm_.detail.Random;
 public class Surface implements Force {
 
     private static final float DENSITY = 1;
-    private static final float LIFT_FACTOR = -2f;
+    private static final float LIFT_FACTOR = -1.901f;
     private final float mag;
 
     public final Particle[] particles;
@@ -64,7 +64,7 @@ public class Surface implements Force {
 
         // apply lift
         for (Particle p: particles) {
-            Vec3 vel2 = vel//p.vel.plus(p.dvdt[order-1].times(dt))
+            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt))
                     //.plus(Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat());
             ;
             vel2 = vel2.times(vel2.length());

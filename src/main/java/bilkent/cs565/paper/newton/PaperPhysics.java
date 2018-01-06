@@ -1,18 +1,23 @@
 package bilkent.cs565.paper.newton;
 
 import bilkent.cs565.paper.model.Paper;
+import bilkent.cs565.paper.model.Wall;
 import bilkent.cs565.paper.model.particle.Force;
 import bilkent.cs565.paper.model.particle.Particle;
 import glm.vec._3.Vec3;
 
+import java.util.List;
+
 public class PaperPhysics {
 
+    private final List<Wall> walls;
     public Paper paper;
     private Vec3 gravity;
 
-    public PaperPhysics(Paper paper, Vec3 gravity) {
+    public PaperPhysics(Paper paper, List<Wall> walls, Vec3 gravity) {
         this.paper = paper;
         this.gravity = gravity;
+        this.walls = walls;
     }
 
     public void step(double dt, int order) {
@@ -33,6 +38,7 @@ public class PaperPhysics {
         float D = -50f;
         // apply collision forces
         for (Particle p: paper.getParticles()) {
+            walls.forEach(wall -> wall.step((float) dt, order, p));
             Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));
             if (pos.x < 0.5f && pos.z < D)
             {

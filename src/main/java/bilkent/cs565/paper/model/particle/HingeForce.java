@@ -6,7 +6,8 @@ import glm.vec._3.Vec3;
 
 public class HingeForce implements Force
 {
-    private static final float STIFFNESS = 100.0f;
+    private static final float STIFFNESS = 20.1f;
+    private static final float DAMPING = 0.4f;
     private final Particle edgeA;
     private final Particle edgeB;
     private final float med;
@@ -35,7 +36,7 @@ public class HingeForce implements Force
         final Vec3 g = pb.pos.minus(pivot);
 
         int dir = (GLM.dot(e, f.cross(g))>0) ? 1 : -1;
-        float cos = GLM.dot(f, g)/(f.length() * g.length());
+        float cos = GLM.dot(f.normalize(), g.normalize());
         if (cos>1) {
             cos = 1f;
         } else if (cos<-1) {
@@ -78,7 +79,7 @@ public class HingeForce implements Force
         final Vec3 g = posPB.minus(pivot);
 
         int dir = (GLM.dot(e, f.cross(g))>0) ? 1 : -1;
-        float cos = GLM.dot(f, g)/(f.length() * g.length());
+        float cos = GLM.dot(f.normalize(), g.normalize());
         if (cos>1) {
             cos = 1f;
         } else if (cos<-1) {
@@ -89,6 +90,9 @@ public class HingeForce implements Force
             angle = 0;
         }
         angle = rest - angle;
+        if (Math.abs(angle)> 0.1) {
+            System.out.println(angle);
+        }
 
         float torque = angle * -STIFFNESS;
 
@@ -98,8 +102,16 @@ public class HingeForce implements Force
         float fl = f.length();
         float gl = g.length();
 
-        Vec3 fa = normPA.times(torque/fl);
-        Vec3 fb = normPB.times(torque/gl);
+
+        Vec3 vpivot = velEA.times((1.f - ed/elen)).plus(velEB.times(ed));
+        Vec3 vlina = normPA.times(GLM.dot(normPA, velPA.minus(vpivot)));
+        Vec3 vlinb = normPB.times(GLM.dot(normPB, velPB.minus(vpivot)));
+
+        Vec3 fa = normPA.times(torque/fl).plus(vlina.times(-DAMPING));
+        Vec3 fb = normPB.times(torque/gl).plus(vlinb.times(-DAMPING));
+        if (pa.id == 0) {
+            System.out.println(String.format("%f %f %f", vlina.x, vlina.y, vlina.z));
+        }
 
 
         pa.dvdt[order] = pa.dvdt[order].plus(fa.div(pa.mass));

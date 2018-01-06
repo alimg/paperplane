@@ -124,6 +124,7 @@ public class Main implements GLEventListener, KeyListener {
     private FloatBuffer clearDepth = GLBuffers.newDirectFloatBuffer(1);
 
     private FloatBuffer matBuffer = GLBuffers.newDirectFloatBuffer(16);
+    private FloatBuffer matBufferProj = GLBuffers.newDirectFloatBuffer(16);
 
     private Program program;
 

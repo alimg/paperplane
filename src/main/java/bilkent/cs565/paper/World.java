@@ -2,6 +2,7 @@ package bilkent.cs565.paper;
 
 import bilkent.cs565.paper.gl.Constants;
 import bilkent.cs565.paper.model.Paper;
+import bilkent.cs565.paper.model.Wall;
 import bilkent.cs565.paper.model.particle.Surface;
 import bilkent.cs565.paper.newton.PaperPhysics;
 import bilkent.cs565.paper.newton.Stepper;
@@ -16,6 +17,8 @@ import uno.glsl.Program;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -24,7 +27,7 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static uno.gl.GlErrorKt.checkError;
 
 public class World {
-    public static final float STEP_SIZE = 1/120f;
+    public static final float STEP_SIZE = 0.5f/120f;
     private int elementCount;
     private ShortBuffer surfaceBuffer;
     private int frames;
@@ -56,7 +59,9 @@ public class World {
         //paper = Paper.createFlat(12, 12, 1.5f, 1.5f);
         paper = Paper.createFromModel();
         //paper = Paper.createFlat(8, 8, 6, 6);
-        PaperPhysics paperP = new PaperPhysics(paper, gravity);
+        List<Wall> walls = new ArrayList<>();
+        walls.add(new Wall(new Vec3(0, -50, 0), new Vec3(0, 1, 0)));
+        PaperPhysics paperP = new PaperPhysics(paper, walls, gravity);
         stepper = new Stepper(paperP);
 
         time = System.nanoTime();
@@ -83,7 +88,7 @@ public class World {
     }
 
     public void initBuffers(GL3 gl) {
-        int vertexCount = paper.getParticles().size() * 6 * 2;
+        int vertexCount = paper.getParticles().size() * 9 * 2;
         elementCount = paper.getSpringForces().size() * 2 + paper.getParticles().size() * 2;
         vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount);
         elementBuffer = GLBuffers.newDirectShortBuffer(elementCount);
@@ -135,7 +140,7 @@ public class World {
         {
             gl.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             {
-                int stride = Vec3.SIZE + Vec3.SIZE;
+                int stride = Vec3.SIZE * 3;
                 int offset = 0;
 
                 gl.glEnableVertexAttribArray(Constants.Attr.POSITION);
@@ -144,6 +149,10 @@ public class World {
                 offset = Vec3.SIZE;
                 gl.glEnableVertexAttribArray(Constants.Attr.COLOR);
                 gl.glVertexAttribPointer(Constants.Attr.COLOR, Vec3.length, GL_FLOAT, false, stride, offset);
+
+                offset = Vec3.SIZE * 2;
+                gl.glEnableVertexAttribArray(Constants.Attr.NORMAL);
+                gl.glVertexAttribPointer(Constants.Attr.NORMAL, Vec3.length, GL_FLOAT, false, stride, offset);
             }
             gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -158,18 +167,20 @@ public class World {
         synchronized(stepper) {
             for (Particle p : paper.getParticles())
             {
-                vertexBuffer.put(p.id * 6 * 2, p.pos.x);
-                vertexBuffer.put(p.id * 6 * 2 + 1, p.pos.y);
-                vertexBuffer.put(p.id * 6 * 2 + 2, p.pos.z);
-                vertexBuffer.put(p.id * 6 * 2 + 3, 0.2f);
-                vertexBuffer.put(p.id * 6 * 2 + 4, 0.2f);
-                vertexBuffer.put(p.id * 6 * 2 + 5, 0.2f);
+                vertexBuffer.put(p.id * 9 * 2, p.pos.x);
+                vertexBuffer.put(p.id * 9 * 2 + 1, p.pos.y);
+                vertexBuffer.put(p.id * 9 * 2 + 2, p.pos.z);
+                vertexBuffer.put(p.id * 9 * 2 + 3, 0.8f);
+                vertexBuffer.put(p.id * 9 * 2 + 4, 0.7f);
+                vertexBuffer.put(p.id * 9 * 2 + 5, 0.7f);
+                vertexBuffer.put(p.id * 9 * 2 + 6, p.norm.x);
+                vertexBuffer.put(p.id * 9 * 2 + 7, p.norm.y);
+                vertexBuffer.put(p.id * 9 * 2 + 8, p.norm.z);
 
-
-                vertexBuffer.put(p.id * 6 * 2 + 6, p.pos.x + p.norm.x*0.1f);
-                vertexBuffer.put(p.id * 6 * 2 + 6 + 1, p.pos.y + p.norm.y*0.1f);
-                vertexBuffer.put(p.id * 6 * 2 + 6 + 2, p.pos.z + p.norm.z*0.1f);
-                vertexBuffer.put(p.id * 6 * 2 + 6 + 5, 1);
+                vertexBuffer.put(p.id * 9 * 2 + 9, p.pos.x + p.norm.x*0.1f);
+                vertexBuffer.put(p.id * 9 * 2 + 9 + 1, p.pos.y + p.norm.y*0.1f);
+                vertexBuffer.put(p.id * 9 * 2 + 9 + 2, p.pos.z + p.norm.z*0.1f);
+                vertexBuffer.put(p.id * 9 * 2 + 9 + 5, 1);
             }
         }
         gl.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
@@ -185,8 +196,8 @@ public class World {
         gl.glBindVertexArray(vertexArrayName.get(0));
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl.glDrawElements(GL_LINES, elementBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
-        //gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT2));
-        //gl.glDrawElements(GL_TRIANGLES, surfaceBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT2));
+        gl.glDrawElements(GL_TRIANGLES, surfaceBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
         gl.glBindVertexArray(0);
 
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);

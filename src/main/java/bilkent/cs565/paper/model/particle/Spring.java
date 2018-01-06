@@ -4,8 +4,8 @@ import bilkent.cs565.paper.World;
 import glm.vec._3.Vec3;
 
 public class Spring implements Force {
-    private static final float STIFFNESS = 0.10f;
-    private static final float DAMPING = 0.05f;
+    private static final float STIFFNESS = 0.0005f;
+    private static final float DAMPING = 0.01f;
 
     public Particle p1;
     public Particle p2;
@@ -46,7 +46,7 @@ public class Spring implements Force {
         Vec3 damp = vrel.times(DAMPING * dMax);
         Vec3 springF = tension.plus(damp);
 
-        p1.dvdt[order] = p1.dvdt[order].plus(springF);
-        p2.dvdt[order] = p2.dvdt[order].minus(springF);
+        p1.dvdt[order] = p1.dvdt[order].plus(springF.div(p1.mass));
+        p2.dvdt[order] = p2.dvdt[order].minus(springF.div(p2.mass));
     }
 }
