@@ -37,10 +37,10 @@ public class Paper {
     }
 
     public static Paper createFromModel() {
-        //String modelFile = "model/plane3.ply";
+        //String modelFile = "model/plane2.ply";
         String modelFile = "model/plane.ply";
         //String modelFile = "model/basic.ply";
-        //String modelFile = "model/basic3.ply";
+        //String modelFile = "model/basic2.ply";
 
         ArrayList<Particle> particles = new ArrayList<>();
         ArrayList<Force> forces = new ArrayList<>();

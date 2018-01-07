@@ -59,13 +59,14 @@ public class Wall {
         Vec3 u = norm.cross(right);
         Vec3 r = u.cross(norm).times(right.length());
         u=u.times(right.length());
-        pos.plus(r.plus(u)).to(f);
+        Vec3 p = pos.minus(norm.times(0.01));
+        p.plus(r.plus(u)).to(f);
         vertexBuffer.put(f,0,9);
-        pos.plus(r.minus(u)).to(f);
+        p.plus(r.minus(u)).to(f);
         vertexBuffer.put(f,0,9);
-        pos.minus(r.plus(u)).to(f);
+        p.minus(r.plus(u)).to(f);
         vertexBuffer.put(f,0,9);
-        pos.minus(r.minus(u)).to(f);
+        p.minus(r.minus(u)).to(f);
         vertexBuffer.put(f,0,9);
 
         float[] buf = new float[vertexBuffer.capacity()];
