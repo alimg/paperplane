@@ -103,6 +103,7 @@ public class Main implements GLEventListener, KeyListener {
 
         }
     };
+    private boolean paused;
 
     public Main() {
         world = new World();
@@ -227,9 +228,11 @@ public class Main implements GLEventListener, KeyListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        world.update();
-        world.update();
-        world.update();
+        if (!paused) {
+            world.update();
+            world.update();
+            world.update();
+        }
         Mat4x4 mat = new Mat4x4();
         camProj.inverse(mat);
         cam = cam.plus(mat.times(new Vec4(camV, 0).times(CAM_SPEED)));
@@ -302,6 +305,9 @@ public class Main implements GLEventListener, KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             running.set(false);
             new Thread(() -> window.destroy()).start();
+        }
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            paused = !paused;
         }
         if( !e.isPrintableKey() || e.isAutoRepeat()  ) {
             return;
