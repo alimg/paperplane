@@ -26,6 +26,7 @@ uniform float shininessFactor;
 
 float calcAttenuation(in vec3 cameraSpacePosition, out vec3 lightDirection)
 {
+    float lightAttenuation = 0.01;
     vec3 lightDifference =  cameraSpaceLightPos - cameraSpacePosition;
     float lightDistanceSqr = dot(lightDifference, lightDifference);
     lightDirection = lightDifference * inversesqrt(lightDistanceSqr);

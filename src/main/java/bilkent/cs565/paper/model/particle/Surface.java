@@ -7,8 +7,8 @@ import glm_.detail.Random;
 
 public class Surface implements Force {
 
-    private static final float DENSITY = 1;
-    private static final float LIFT_FACTOR = -2.901f;
+    private static final float DENSITY = 2.1f;
+    private static final float LIFT_FACTOR = -1.9f;
     private final float mag;
 
     public final Particle[] particles;
@@ -26,8 +26,8 @@ public class Surface implements Force {
         Vec3 center = new Vec3();
         for (Particle p1: particles) {
             center = center.plus(p1.pos);
-            p1.mass += 1;
-            //p1.mass += c1.cross(c2).length()/2 * DENSITY;
+            //p1.mass += 1;
+            p1.mass += c1.cross(c2).length()/2 * DENSITY;
         }
         mag = particles[0].pos.minus(center).length();
     }

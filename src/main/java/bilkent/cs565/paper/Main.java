@@ -42,7 +42,7 @@ public class Main implements GLEventListener, KeyListener {
     private final World world;
     private Thread thread;
     private AtomicBoolean running = new AtomicBoolean(true);
-    private Vec4 cam = new Vec4(0, -3, -40, 0);
+    private Vec4 cam = new Vec4(10, -5, -30, 0);
     private Vec3 camV = new Vec3();
     private Mat4x4 camProj = new Mat4x4();
     private Vec3 camDir = new Vec3(0,0,1);
@@ -60,7 +60,9 @@ public class Main implements GLEventListener, KeyListener {
         public void mouseEntered(MouseEvent e) {}
 
         @Override
-        public void mouseExited(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {
+            camV = new Vec3();
+        }
 
         @Override
         public void mousePressed(MouseEvent e) {
@@ -127,6 +129,7 @@ public class Main implements GLEventListener, KeyListener {
     private FloatBuffer matBufferProj = GLBuffers.newDirectFloatBuffer(16);
 
     private Program program;
+    private Program programLine;
 
     private long start;
 
@@ -161,12 +164,14 @@ public class Main implements GLEventListener, KeyListener {
     public void init(GLAutoDrawable drawable) {
 
         GL3 gl = drawable.getGL().getGL3();
+        gl.getExtension("OES_standard_derivatives");
 
         initBuffers(gl);
 
         initProgram(gl);
 
         gl.glEnable(GL_DEPTH_TEST);
+
 
         world.initBuffers(gl);
         world.initVertexArray(gl);
@@ -210,6 +215,14 @@ public class Main implements GLEventListener, KeyListener {
         }
         gl.glUniformBlockBinding(program.name, globalMatricesBI, Constants.Uniform.GLOBAL_MATRICES);
 
+
+        programLine = new Program(gl, getClass(), "gl3/shaders", "line.vert", "line.frag", "model");
+        globalMatricesBI = gl.glGetUniformBlockIndex(program.name, "GlobalMatrices");
+        if (globalMatricesBI == -1) {
+            System.err.println("block index 'GlobalMatrices' not found!");
+        }
+        gl.glUniformBlockBinding(programLine.name, globalMatricesBI, Constants.Uniform.GLOBAL_MATRICES);
+
         checkError(gl, "initProgram");
     }
 
@@ -244,8 +257,7 @@ public class Main implements GLEventListener, KeyListener {
         gl.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0.66f).put(1, .66f).put(2, 0.66f).put(3, 1f));
         gl.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1f));
 
-        gl.glUseProgram(program.name);
-        world.draw(gl, program);
+        world.draw(gl, program, programLine);
 
         gl.glBindVertexArray(0);
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -276,6 +288,7 @@ public class Main implements GLEventListener, KeyListener {
         GL3 gl = drawable.getGL().getGL3();
 
         gl.glDeleteProgram(program.name);
+        gl.glDeleteProgram(programLine.name);
         gl.glDeleteVertexArrays(1, vertexArrayName);
         gl.glDeleteBuffers(Buffer.MAX, bufferName);
 

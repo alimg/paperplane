@@ -1,27 +1,24 @@
 package bilkent.cs565.paper.model;
 
-import bilkent.cs565.paper.model.particle.Edge;
-import bilkent.cs565.paper.model.particle.Force;
-import bilkent.cs565.paper.model.particle.HingeForce;
-import bilkent.cs565.paper.model.particle.Particle;
-import bilkent.cs565.paper.model.particle.Spring;
-import bilkent.cs565.paper.model.particle.Surface;
+import bilkent.cs565.paper.model.particle.*;
 import glm.vec._3.Vec3;
-import org.smurn.jply.*;
+import org.smurn.jply.Element;
+import org.smurn.jply.ElementReader;
+import org.smurn.jply.ElementType;
+import org.smurn.jply.PlyReaderFile;
 import org.smurn.jply.util.NormalMode;
 import org.smurn.jply.util.NormalizingPlyReader;
 import org.smurn.jply.util.TesselationMode;
 import org.smurn.jply.util.TextureMode;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Paper {
 
+    private static final float MODEL_SCALE = 0.55f;
     private final List<Force> forces;
     private final List<Particle> particles;
     private final List<Spring> springForces = new ArrayList<>();
@@ -30,29 +27,30 @@ public class Paper {
     public Paper(ArrayList<Particle> particles, ArrayList<Force> forces) {
         this.particles = particles;
         this.forces = forces;
-        forces.forEach((f)-> {
+        forces.forEach((f) -> {
             if (f instanceof Spring) {
                 springForces.add((Spring) f);
-            } else if (f instanceof Surface){
+            } else if (f instanceof Surface) {
                 surfaces.add((Surface) f);
             }
         });
     }
 
     public static Paper createFromModel() {
+        String modelFile = "model/plane3.ply";
+        //String modelFile = "model/plane2.ply";
+        //String modelFile = "model/basic.ply";
+
         ArrayList<Particle> particles = new ArrayList<>();
         ArrayList<Force> forces = new ArrayList<>();
         HashMap<Edge, Particle> hingeEdges = new HashMap<>();
         try {
             NormalizingPlyReader ply = new NormalizingPlyReader(new PlyReaderFile(
-                    ClassLoader.getSystemResourceAsStream("model/plane2.ply")),
+                    ClassLoader.getSystemResourceAsStream(modelFile)),
                     TesselationMode.TRIANGLES,
                     NormalMode.ADD_NORMALS_CCW,
                     TextureMode.XY
             );
-
-            int vertexCount = ply.getElementCount("vertex");
-            int triangleCount = ply.getElementCount("face");
 
             ElementReader reader = ply.nextElementReader();
             while (reader != null) {
@@ -63,7 +61,7 @@ public class Paper {
                         Particle p = new Particle(particles.size());
                         p.pos = new Vec3(element.getDouble("x"),
                                 element.getDouble("y"),
-                                element.getDouble("z"));
+                                element.getDouble("z")).times(MODEL_SCALE);
                         particles.add(p);
                         element = reader.readElement();
                     }
@@ -114,10 +112,10 @@ public class Paper {
         for (int x = 0; x < n; x++) {
             for (int y = 0; y < m; y++) {
                 Particle p = new Particle(particles.size());
-                p.pos = new Vec3(x*X/n, y*Y/m, Math.random()*0.11 + x*0.02*X/n+ 4);
+                p.pos = new Vec3(x * X / n, y * Y / m, Math.random() * 0.11 + x * 0.02 * X / n + 4);
                 p.norm = new Vec3(0, 0, 1);
                 p.dir = new Vec3(0, -1, 0);
-                p.vel = new Vec3(0.2f,0.1f,0);
+                p.vel = new Vec3(0.2f, 0.1f, 0);
                 particles.add(p);
             }
         }
@@ -180,10 +178,13 @@ public class Paper {
     }
 
     private static void addHinges(
-        final Surface f, final HashMap<Edge, Particle> hingeEdges, final ArrayList<Force> forces) {
-        for (int i = 0; i<3; i++) {
-            int j = (i+1) % 3;
-            int k = (i+2) % 3;
+            final Surface f, final HashMap<Edge, Particle> hingeEdges, final ArrayList<Force> forces) {
+        if (f.particles.length != 3) {
+            return;
+        }
+        for (int i = 0; i < 3; i++) {
+            int j = (i + 1) % 3;
+            int k = (i + 2) % 3;
 
             final Edge edge = new Edge(f.particles[i], f.particles[j]);
             final Particle h = hingeEdges.get(edge);

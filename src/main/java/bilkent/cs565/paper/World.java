@@ -18,7 +18,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -27,13 +26,14 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static uno.gl.GlErrorKt.checkError;
 
 public class World {
-    public static final float STEP_SIZE = 0.5f/120f;
+    public static final float STEP_SIZE = 1f/120f;
+    private final ArrayList<Wall> walls = new ArrayList<>();
     private int elementCount;
     private ShortBuffer surfaceBuffer;
     private int frames;
     private int framesD;
 
-    private interface Buffer {
+    public interface Buffer {
         int VERTEX = 0;
         int ELEMENT = 1;
         int ELEMENT2 = 2;
@@ -42,7 +42,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -0.9);
+    private final Vec3 gravity = new Vec3(0, 0, -2.9);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;
@@ -59,8 +59,8 @@ public class World {
         //paper = Paper.createFlat(12, 12, 1.5f, 1.5f);
         paper = Paper.createFromModel();
         //paper = Paper.createFlat(8, 8, 6, 6);
-        List<Wall> walls = new ArrayList<>();
-        walls.add(new Wall(new Vec3(0, -50, 0), new Vec3(0, 1, 0)));
+        walls.add(new Wall(new Vec3(0, -40, 0), new Vec3(0, 1, 0), new Vec3(10, 0, 0)));
+        walls.add(new Wall(new Vec3(0, 0, -40), new Vec3(0, 0, 1), new Vec3(10, 0, 0)));
         PaperPhysics paperP = new PaperPhysics(paper, walls, gravity);
         stepper = new Stepper(paperP);
 
@@ -134,7 +134,6 @@ public class World {
     }
 
     public void initVertexArray(GL3 gl) {
-
         gl.glGenVertexArrays(1, vertexArrayName);
         gl.glBindVertexArray(vertexArrayName.get(0));
         {
@@ -155,15 +154,18 @@ public class World {
                 gl.glVertexAttribPointer(Constants.Attr.NORMAL, Vec3.length, GL_FLOAT, false, stride, offset);
             }
             gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl.glBindVertexArray(0);
+
+        for (Wall w: walls) {
+            w.initVertexArray(gl);
+        }
+
         gl.glCullFace(GL_FRONT_AND_BACK);
         checkError(gl, "initVao");
     }
 
-    public void draw(GL3 gl, Program program) {
+    public void draw(GL3 gl, Program program, Program programLine) {
         synchronized(stepper) {
             for (Particle p : paper.getParticles())
             {
@@ -183,23 +185,39 @@ public class World {
                 vertexBuffer.put(p.id * 9 * 2 + 9 + 5, 1);
             }
         }
+
+        gl.glUseProgram(program.name);
         gl.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl.glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer.capacity() * Float.BYTES, vertexBuffer);
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
         Mat4x4 model = new Mat4x4();
-        model.scale(0.50f).to(matBuffer);
+        model.to(matBuffer);
+        gl.glUniformMatrix4fv(program.get("model"), 1, false, matBuffer);
 
+
+        gl.glUseProgram(programLine.name);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
+        gl.glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer.capacity() * Float.BYTES, vertexBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
         gl.glUniformMatrix4fv(program.get("model"), 1, false, matBuffer);
 
         gl.glBindVertexArray(vertexArrayName.get(0));
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl.glDrawElements(GL_LINES, elementBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
+        gl.glUseProgram(program.name);
         gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT2));
         gl.glDrawElements(GL_TRIANGLES, surfaceBuffer.capacity(), GL_UNSIGNED_SHORT, 0);
-        gl.glBindVertexArray(0);
 
+
+        model = new Mat4x4();
+        model.to(matBuffer);
+        gl.glUniformMatrix4fv(program.get("model"), 1, false, matBuffer);
+        for (Wall wall: walls) {
+            wall.draw(gl);
+        }
+
+        gl.glBindVertexArray(0);
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 

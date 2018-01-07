@@ -12,7 +12,7 @@ public class Particle {
     public Vec3 normSum = new Vec3();
     public int normCount = 0;
     public Vec3 dir = new Vec3();
-    public Vec3 vel = new Vec3(0,-10,0);
+    public Vec3 vel = new Vec3(0,-8,2);
 
     public Vec3 dxdt[] = new Vec3[5];
     public Vec3 dvdt[] = new Vec3[5];

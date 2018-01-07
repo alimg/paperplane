@@ -4,8 +4,8 @@ import bilkent.cs565.paper.World;
 import glm.vec._3.Vec3;
 
 public class Spring implements Force {
-    private static final float STIFFNESS = 0.002f;
-    private static final float DAMPING = 0.05f;
+    private static final float STIFFNESS = 0.1f;
+    private static final float DAMPING = 0.1f;
 
     public Particle p1;
     public Particle p2;

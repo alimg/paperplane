@@ -39,7 +39,7 @@ public class PaperPhysics {
         // apply collision forces
         for (Particle p: paper.getParticles()) {
             walls.forEach(wall -> wall.step((float) dt, order, p));
-            Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));
+            /*Vec3 pos = p.pos.plus(p.dxdt[order-1].times(dt));
             if (pos.x < 0.5f && pos.z < D)
             {
                 if (pos.z > D-.2) {
@@ -49,7 +49,7 @@ public class PaperPhysics {
                     //p.dxdt[order] = p.dxdt[order].plus(v);
                     p.dvdt[order] = p.dvdt[order].plus(f);
                 }
-            }
+            }*/
             p.norm = p.normSum.div(p.normCount);
             p.normSum = new Vec3();
             p.normCount = 0;
