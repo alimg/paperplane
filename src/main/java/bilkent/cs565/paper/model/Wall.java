@@ -19,7 +19,7 @@ import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 public class Wall {
     private static final float BOUNCE = 0.2f;
     private static final float DAMP = 0.9f;
-    private static final float FRICTION = 0.11f;
+    private static final float FRICTION = 10.f;
     private final Vec3 pos;
     private final Vec3 norm;
     private final Vec3 right;
