@@ -42,7 +42,7 @@ public class World {
     }
 
     private final Paper paper;
-    private final Vec3 gravity = new Vec3(0, 0, -2.9);
+    private final Vec3 gravity = new Vec3(0, 0, -7.9);
     private final Stepper stepper;
     private long time;
     private FloatBuffer vertexBuffer;

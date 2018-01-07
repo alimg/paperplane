@@ -12,7 +12,7 @@ public class HingeForce implements Force {
     private final float med;
     private final Particle pa;
     private final Particle pb;
-    private final double rest;
+    private double rest;
 
     public HingeForce(final Edge edge, final Particle pa, final Particle pb) {
         double rest_;
@@ -96,6 +96,15 @@ public class HingeForce implements Force {
         }
         if (angle > Math.PI) {
             angle = -Math.PI * 2 + angle;
+        }
+        if (Math.abs(angle) > 0.7f) {
+            rest = angle + rest / 2;
+            if (rest < 0) {
+                rest = 2*Math.PI - rest;
+            }
+            if (rest > 2*Math.PI) {
+                rest = rest - 2*Math.PI;
+            }
         }
         if (angle > 0.05) {
             angle = 0.05f;

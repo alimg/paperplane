@@ -164,7 +164,6 @@ public class Main implements GLEventListener, KeyListener {
     public void init(GLAutoDrawable drawable) {
 
         GL3 gl = drawable.getGL().getGL3();
-        gl.getExtension("OES_standard_derivatives");
 
         initBuffers(gl);
 
