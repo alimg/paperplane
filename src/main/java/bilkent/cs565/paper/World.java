@@ -1,13 +1,14 @@
 package bilkent.cs565.paper;
 
 import bilkent.cs565.paper.gl.Constants;
-import bilkent.cs565.paper.model.Paper;
-import bilkent.cs565.paper.model.Wall;
-import bilkent.cs565.paper.model.particle.Surface;
-import bilkent.cs565.paper.newton.PaperPhysics;
-import bilkent.cs565.paper.newton.Stepper;
-import bilkent.cs565.paper.model.particle.Particle;
-import bilkent.cs565.paper.model.particle.Spring;
+import bilkent.cs565.paper.physics.Paper;
+import bilkent.cs565.paper.physics.Wall;
+import bilkent.cs565.paper.gl.WallRenderer;
+import bilkent.cs565.paper.physics.particle.Surface;
+import bilkent.cs565.paper.integration.PaperPhysics;
+import bilkent.cs565.paper.integration.Stepper;
+import bilkent.cs565.paper.physics.particle.Particle;
+import bilkent.cs565.paper.physics.particle.Spring;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import glm.mat.Mat4x4;
@@ -28,6 +29,7 @@ import static uno.gl.GlErrorKt.checkError;
 public class World {
     public static final float STEP_SIZE = 1f/120f;
     private final ArrayList<Wall> walls = new ArrayList<>();
+    private final ArrayList<WallRenderer> wallRenderers = new ArrayList<>();
     private int elementCount;
     private ShortBuffer surfaceBuffer;
     private int frames;
@@ -60,7 +62,7 @@ public class World {
         paper = Paper.createFromModel();
         //paper = Paper.createFlat(8, 8, 6, 6);
         walls.add(new Wall(new Vec3(0, -40, 0), new Vec3(0, 1, 0), new Vec3(10, 0, 0)));
-        walls.add(new Wall(new Vec3(0, 0, -40), new Vec3(0, 0, 1), new Vec3(10, 0, 0)));
+        walls.add(new Wall(new Vec3(0, -0, -30), new Vec3(0, 0, 1), new Vec3(10, 0, 0)));
         PaperPhysics paperP = new PaperPhysics(paper, walls, gravity);
         stepper = new Stepper(paperP);
 
@@ -158,7 +160,9 @@ public class World {
         gl.glBindVertexArray(0);
 
         for (Wall w: walls) {
-            w.initVertexArray(gl);
+            WallRenderer r = new WallRenderer(w);
+            wallRenderers.add(r);
+            r.initVertexArray(gl);
         }
 
         gl.glCullFace(GL_FRONT_AND_BACK);
@@ -213,7 +217,7 @@ public class World {
         model = new Mat4x4();
         model.to(matBuffer);
         gl.glUniformMatrix4fv(program.get("model"), 1, false, matBuffer);
-        for (Wall wall: walls) {
+        for (WallRenderer wall: wallRenderers) {
             wall.draw(gl);
         }
 

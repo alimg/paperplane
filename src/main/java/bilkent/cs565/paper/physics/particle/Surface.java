@@ -1,8 +1,7 @@
-package bilkent.cs565.paper.model.particle;
+package bilkent.cs565.paper.physics.particle;
 
 import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
-import glm_.detail.Random;
 
 
 public class Surface implements Force {
@@ -64,9 +63,7 @@ public class Surface implements Force {
 
         // apply lift
         for (Particle p: particles) {
-            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt))
-                    //.plus(Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat(), Random.INSTANCE.getFloat());
-            ;
+            Vec3 vel2 = p.vel.plus(p.dvdt[order-1].times(dt));
             vel2 = vel2.times(vel2.length());
             Vec3 liftImpulse = n1.times(GLM.dot(n1, vel2) * area * LIFT_FACTOR / p.mass);
             p.dvdt[order] = p.dvdt[order].plus(liftImpulse);

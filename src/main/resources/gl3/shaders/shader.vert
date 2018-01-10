@@ -28,13 +28,13 @@ out vec3 cameraSpacePosition;
 void main() {
     vec4 tempCamPosition = proj * (view * (model * vec4(position, 1)));// (modelToCameraMatrix * vec4(position, 1.0));
     gl_Position = tempCamPosition;
-    //vertexNormal = (proj * (view * (model * vec4(normal, 1)))).xyz;
+    //vertexNormal = (proj * (view * (physics * vec4(normal, 1)))).xyz;
     vertexNormal = normal;
     diffuseColor_ = vec4(diffuseColor, 1);
     cameraSpacePosition = vec3(tempCamPosition);
 /*
     // Normally gl_Position is in Clip Space and we calculate it by multiplying together all the matrices
-    gl_Position = proj * (view * (model * vec4(position, 1)));
+    gl_Position = proj * (view * (physics * vec4(position, 1)));
 
     // We assign the color to the outgoing variable.
     interpolatedColor = color;*/

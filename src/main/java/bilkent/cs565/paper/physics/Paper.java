@@ -1,6 +1,6 @@
-package bilkent.cs565.paper.model;
+package bilkent.cs565.paper.physics;
 
-import bilkent.cs565.paper.model.particle.*;
+import bilkent.cs565.paper.physics.particle.*;
 import glm.vec._3.Vec3;
 import org.smurn.jply.Element;
 import org.smurn.jply.ElementReader;
@@ -37,10 +37,11 @@ public class Paper {
     }
 
     public static Paper createFromModel() {
-        //String modelFile = "model/plane2.ply";
         String modelFile = "model/plane.ply";
-        //String modelFile = "model/basic.ply";
-        //String modelFile = "model/basic2.ply";
+        //String modelFile = "physics/planex.ply";
+        //String modelFile = "physics/basic.ply";
+        //String modelFile = "physics/basic2.ply";
+        //String modelFile = "physics/basic3.ply";
 
         ArrayList<Particle> particles = new ArrayList<>();
         ArrayList<Force> forces = new ArrayList<>();

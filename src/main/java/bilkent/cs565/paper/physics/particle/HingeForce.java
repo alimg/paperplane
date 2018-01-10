@@ -1,11 +1,11 @@
-package bilkent.cs565.paper.model.particle;
+package bilkent.cs565.paper.physics.particle;
 
 import bilkent.cs565.paper.World;
 import bilkent.cs565.paper.gl.GLM;
 import glm.vec._3.Vec3;
 
 public class HingeForce implements Force {
-    private static final float STIFFNESS = 0.14f;
+    private static final float STIFFNESS = 0.16f;
     private static final float DAMPING = 0.000f;
     private final Particle edgeA;
     private final Particle edgeB;
@@ -15,14 +15,13 @@ public class HingeForce implements Force {
     private double rest;
 
     public HingeForce(final Edge edge, final Particle pa, final Particle pb) {
-        double rest_;
         edgeA = edge.a;
         edgeB = edge.b;
 
         this.pa = pa;
         this.pb = pb;
 
-        // http://morroworks.com/Content/Docs/Rays%20closest%20point.pdf
+        // Adapted from http://morroworks.com/Content/Docs/Rays%20closest%20point.pdf
         final Vec3 c = pa.pos.minus(edgeA.pos);
         final Vec3 d = pb.pos.minus(pa.pos).normalize();
         final Vec3 e = edgeB.pos.minus(edgeA.pos).normalize();
@@ -87,7 +86,6 @@ public class HingeForce implements Force {
 
         double angle = getAngle(e, f.normalize(), g.normalize());
         if (Double.isNaN(angle)) {
-            angle = 0;
             return;
         }
         angle = rest - angle;
@@ -97,7 +95,7 @@ public class HingeForce implements Force {
         if (angle > Math.PI) {
             angle = -Math.PI * 2 + angle;
         }
-        if (Math.abs(angle) > 0.7f) {
+        if (Math.abs(angle) > 0.7f && order == 4) {
             rest = angle + rest / 2;
             if (rest < 0) {
                 rest = 2*Math.PI - rest;
@@ -106,11 +104,11 @@ public class HingeForce implements Force {
                 rest = rest - 2*Math.PI;
             }
         }
-        if (angle > 0.05) {
-            angle = 0.05f;
+        if (angle > 0.09) {
+            angle = 0.09f;
         }
-        if (angle < -0.05) {
-            angle = -0.05f;
+        if (angle < -0.09) {
+            angle = -0.09f;
         }
         angle *= -1;
 

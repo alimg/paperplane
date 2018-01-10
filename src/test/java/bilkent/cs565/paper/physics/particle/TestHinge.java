@@ -1,4 +1,4 @@
-package bilkent.cs565.paper.model.particle;
+package bilkent.cs565.paper.physics.particle;
 
 import glm.vec._3.Vec3;
 import org.junit.Test;

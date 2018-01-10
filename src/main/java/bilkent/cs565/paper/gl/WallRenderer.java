@@ -1,10 +1,7 @@
-package bilkent.cs565.paper.model;
+package bilkent.cs565.paper.gl;
 
 import bilkent.cs565.paper.World;
-import bilkent.cs565.paper.gl.Constants;
-import bilkent.cs565.paper.gl.GLM;
-import bilkent.cs565.paper.model.particle.Particle;
-import com.jogamp.opengl.GL;
+import bilkent.cs565.paper.physics.Wall;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import glm.vec._3.Vec3;
@@ -14,15 +11,16 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
 
-public class Wall {
-    private static final float BOUNCE = 0.2f;
-    private static final float DAMP = 0.9f;
-    private static final float FRICTION = 10.f;
-    private final Vec3 pos;
-    private final Vec3 norm;
-    private final Vec3 right;
+public class WallRenderer {
+
+    private final Wall wall;
+
+    public WallRenderer(Wall wall) {
+        this.wall = wall;
+    }
 
     private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(World.Buffer.MAX);
     private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(2);
@@ -30,30 +28,12 @@ public class Wall {
     private ShortBuffer elementBuffer;
     private FloatBuffer matBuffer = GLBuffers.newDirectFloatBuffer(16);
 
-    public Wall(Vec3 pos, Vec3 norm, Vec3 right) {
-        this.pos = pos;
-        this.norm = norm;
-        this.right = right;
-    }
-
-    public void step(float dt, int order, Particle particle) {
-        Vec3 x = particle.pos.plus(particle.dxdt[order-1].times(dt)).minus(pos);
-        Vec3 v = particle.vel.plus(particle.dvdt[order-1].times(dt));
-        float kMax = particle.mass / (World.STEP_SIZE * World.STEP_SIZE);
-        float dMax = particle.mass / (World.STEP_SIZE);
-
-        float d = GLM.dot(x, norm);
-        if (d<0) {
-            Vec3 f = norm.times(d * -kMax * BOUNCE - GLM.dot(norm, v) * dMax * DAMP)
-                    //.plus(norm.cross(v).times())
-                    .plus(norm.cross(v).cross(norm).times(-FRICTION));
-            particle.dvdt[order] = particle.dvdt[order].plus(f.div(particle.mass));
-        }
-    }
-
     public void initVertexArray(GL3 gl) {
         vertexBuffer = GLBuffers.newDirectFloatBuffer(4 * 9);
         elementBuffer = GLBuffers.newDirectShortBuffer(4);
+        Vec3 norm = wall.norm;
+        Vec3 pos = wall.pos;
+        Vec3 right = wall.right;
 
         float f[] = new float[]{0,0,0, 0.5f, 0.5f, 0.5f, norm.x, norm.y, norm.z};
         Vec3 u = norm.cross(right);

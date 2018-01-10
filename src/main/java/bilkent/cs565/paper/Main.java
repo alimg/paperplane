@@ -14,6 +14,7 @@ import glm.vec._4.Vec4;
 import glm_.mat4x4.Mat4;
 import uno.glsl.Program;
 
+import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
@@ -36,7 +37,7 @@ import static uno.gl.GlErrorKt.checkError;
 
 public class Main implements GLEventListener, KeyListener {
 
-    private static final float CAM_SPEED = 0.1f;
+    private static final float CAM_SPEED = 0.3f;
     private static GLWindow window;
     private static Animator animator;
     private final World world;
@@ -89,8 +90,8 @@ public class Main implements GLEventListener, KeyListener {
             if (e.isButtonDown(MouseEvent.BUTTON1) && prevCoord != null) {
                 float dx = e.getX() - prevCoord.x;
                 float dy = e.getY() - prevCoord.y;
-                rotate.x -= dx/window.getWidth();
-                rotate.y += dy/window.getHeight();
+                rotate.x -= dx/window.getWidth()  * 2;
+                rotate.y += dy/window.getHeight() * 2;
                 Mat4x4 proj = new Mat4x4();
                 proj = proj.rotate(rotate.y, new Vec3(-1.0f, 0.0f, 0.0f));
                 camProj = proj.rotate(rotate.x, new Vec3(0.0f, 1.0f, 0.0f));

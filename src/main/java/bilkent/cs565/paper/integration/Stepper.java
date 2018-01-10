@@ -1,4 +1,4 @@
-package bilkent.cs565.paper.newton;
+package bilkent.cs565.paper.integration;
 
 public class Stepper {
     public PaperPhysics paper;

@@ -1,4 +1,4 @@
-package bilkent.cs565.paper.model.particle;
+package bilkent.cs565.paper.physics.particle;
 
 import bilkent.cs565.paper.World;
 import glm.vec._3.Vec3;
